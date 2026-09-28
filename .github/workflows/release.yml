@@ -55,7 +55,7 @@ jobs:
           autoconf automake autotools-dev autopoint libtool pkg-config \
           gettext libssl-dev libgnutls28-dev libc-ares-dev zlib1g-dev \
           libsqlite3-dev libssh2-1-dev libxml2-dev libexpat1-dev \
-          libnettle-dev libcppunit-dev python3-docutils xz-utils
+          nettle-dev libcppunit-dev python3-docutils xz-utils
     - name: Generate ChangeLog
       run: |
         set -euo pipefail
