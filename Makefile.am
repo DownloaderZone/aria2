@@ -9,6 +9,7 @@ EXTRA_DIST = config.rpath \
 	     mingw-config mingw-release mingw-build-memo \
 	     makerelease-osx.mk osx-package/DS_Store osx-package/etc/paths.d/aria2c osx-package/etc/manpaths.d/aria2 \
 	     Dockerfile.mingw \
+	     Dockerfile.linux \
 	     Dockerfile.raspberrypi \
 	     examples/libaria2ex.cc examples/libaria2wx.cc
 

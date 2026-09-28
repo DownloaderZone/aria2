@@ -151,9 +151,59 @@ jobs:
         path: aria2-*.tar.gz
         if-no-files-found: error
 
+  linux:
+    name: Linux binary (${{ matrix.arch }})
+    needs: version
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: ubuntu-24.04
+          arch: amd64
+          platform: linux/amd64
+        - os: ubuntu-24.04-arm
+          arch: arm64
+          platform: linux/arm64
+    steps:
+    - uses: actions/checkout@v7
+    - uses: docker/setup-qemu-action@v3
+    - uses: docker/setup-buildx-action@v3
+    - name: Build aria2c static binary
+      env:
+        ARCH: ${{ matrix.arch }}
+        PLATFORM: ${{ matrix.platform }}
+        TAG: ${{ needs.version.outputs.tag }}
+        VERSION: ${{ needs.version.outputs.version }}
+      run: |
+        set -euo pipefail
+        docker buildx build \
+          --platform "$PLATFORM" \
+          -f Dockerfile.linux \
+          -t "aria2-linux-$ARCH" \
+          --load .
+        mkdir -p out
+        docker run --rm --platform "$PLATFORM" -v "$PWD/out:/out" "aria2-linux-$ARCH" cp /aria2/src/aria2c /out/
+        mkdir -p "aria2-$VERSION-linux-$ARCH"
+        cp out/aria2c README.rst COPYING "aria2-$VERSION-linux-$ARCH/"
+        tar czf "aria2-$VERSION-linux-$ARCH.tar.gz" "aria2-$VERSION-linux-$ARCH"
+        cp "aria2-$VERSION-linux-$ARCH.tar.gz" "aria2-linux-$ARCH.tar.gz"
+        cp out/aria2c "aria2c-$VERSION-linux-$ARCH"
+        cp out/aria2c "aria2c-linux-$ARCH"
+        ls -lh aria2*
+    - uses: actions/upload-artifact@v4
+      with:
+        name: linux-${{ matrix.arch }}
+        path: |
+          aria2-*-linux-${{ matrix.arch }}.tar.gz
+          aria2-linux-${{ matrix.arch }}.tar.gz
+          aria2c-*-linux-${{ matrix.arch }}
+          aria2c-linux-${{ matrix.arch }}
+        if-no-files-found: error
+
   publish:
     name: Create GitHub release
-    needs: [version, source, windows, macos]
+    needs: [version, source, windows, macos, linux]
     runs-on: ubuntu-22.04
     permissions:
       contents: write

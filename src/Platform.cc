@@ -113,16 +113,13 @@ bool Platform::setUp()
 
 #ifdef HAVE_OPENSSL
 #  if OPENSSL_VERSION_NUMBER >= 0x30000000L
-  // RC4 is in the legacy provider.
-  legacy_provider_ = OSSL_PROVIDER_load(nullptr, "legacy");
-  if (!legacy_provider_) {
-    throw DL_ABORT_EX("OSSL_PROVIDER_load 'legacy' failed.");
-  }
-
   default_provider_ = OSSL_PROVIDER_load(nullptr, "default");
   if (!default_provider_) {
     throw DL_ABORT_EX("OSSL_PROVIDER_load 'default' failed.");
   }
+
+  // Legacy provider is optional in this fork since BitTorrent/RC4 is removed.
+  legacy_provider_ = OSSL_PROVIDER_load(nullptr, "legacy");
 #  elif !OPENSSL_101_API
   // for SSL initialization
   SSL_load_error_strings();

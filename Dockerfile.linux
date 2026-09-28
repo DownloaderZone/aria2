@@ -1,0 +1,46 @@
+# Dockerfile to build static aria2 Linux binary using Alpine Linux musl toolchain.
+#
+# Produces a self-contained, statically linked binary runnable on any Linux distribution (amd64 / arm64).
+
+FROM alpine:latest
+
+RUN apk add --no-cache \
+    build-base \
+    autoconf \
+    automake \
+    libtool \
+    pkgconf \
+    gettext-dev \
+    cppunit-dev \
+    openssl-dev \
+    openssl-libs-static \
+    c-ares-dev \
+    c-ares-static \
+    zlib-dev \
+    zlib-static \
+    sqlite-dev \
+    sqlite-static \
+    libssh2-dev \
+    libssh2-static \
+    expat-dev \
+    expat-static \
+    ca-certificates
+
+WORKDIR /aria2
+COPY . /aria2
+
+RUN autoreconf -i && \
+    ./configure \
+        --disable-nls \
+        --without-gnutls \
+        --with-openssl \
+        --with-sqlite3 \
+        --with-libcares \
+        --with-libssh2 \
+        --with-libz \
+        --with-libexpat \
+        --without-libxml2 \
+        --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
+        ARIA2_STATIC=yes && \
+    make -j$(nproc) && \
+    strip src/aria2c
