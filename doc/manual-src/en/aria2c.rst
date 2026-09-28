@@ -3600,7 +3600,7 @@ Parallel downloads of an arbitrary number of URIs
 
 SEE ALSO
 --------
-Project Web Site: https://aria2.github.io/
+Project Web Site: https://github.com/DownloaderZone/aria2
 
 Metalink Homepage: http://www.metalinker.org/
 

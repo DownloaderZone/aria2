@@ -3,8 +3,8 @@
 VERSION=$1
 PREV_VERSION=$2
 
-git checkout refs/tags/release-$VERSION
-git log --pretty=fuller --date=short refs/tags/release-$PREV_VERSION..HEAD > ChangeLog
+git checkout refs/tags/v$VERSION
+git log --pretty=fuller --date=short refs/tags/v$PREV_VERSION..HEAD > ChangeLog
 
 autoreconf -i
 
@@ -21,8 +21,8 @@ release_mingw()
 
     docker build \
 	   --build-arg HOST=$HOST \
-	   --build-arg ARIA2_VERSION=release-$VERSION \
-	   --build-arg ARIA2_REF=refs/tags/release-$VERSION \
+	   --build-arg ARIA2_VERSION=v$VERSION \
+	   --build-arg ARIA2_REF=refs/tags/v$VERSION \
 	   -t aria2-mingw-$HOST - < Dockerfile.mingw
 
     docker run --rm -it -v $PWD/mingw-out:/out aria2-mingw-$HOST \
@@ -43,7 +43,7 @@ release_mingw x86_64-w64-mingw32 win-64bit
 mkdir -p android-out
 
 docker build \
-       --build-arg ARIA2_VERSION=release-$VERSION \
+       --build-arg ARIA2_VERSION=v$VERSION \
        -t aria2-android - < Dockerfile.android
 
 docker run --rm -it -v $PWD/android-out:/out aria2-android \

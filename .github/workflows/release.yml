@@ -1,0 +1,199 @@
+name: release
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    name: Get version and create tag
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+    - id: version
+      name: Get version
+      run: |
+        VER=$(sed -n 's/^AC_INIT(\[aria2\],\[\([^]]*\)\].*/\1/p' configure.ac)
+        if [ -z "$VER" ]; then
+          echo "::error::Could not read the version from configure.ac"
+          exit 1
+        fi
+        echo "version=$VER" >> "$GITHUB_OUTPUT"
+        echo "version=$VER"
+    - id: tag
+      name: Create tag
+      env:
+        TAG: v${{ steps.version.outputs.version }}
+      run: |
+        if git rev-parse "$TAG" >/dev/null 2>&1; then
+          echo "Tag $TAG already exists, skipping"
+        else
+          git tag "$TAG"
+          git push origin "$TAG"
+        fi
+        echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+  source:
+    name: Source tarballs
+    needs: version
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          autoconf automake autotools-dev autopoint libtool pkg-config \
+          gettext libssl-dev libgnutls28-dev libc-ares-dev zlib1g-dev \
+          libsqlite3-dev libssh2-1-dev libxml2-dev libexpat1-dev \
+          libnettle-dev libcppunit-dev python3-docutils xz-utils
+    - name: Generate ChangeLog
+      run: |
+        set -euo pipefail
+        PREV=$(git describe --tags --abbrev=0 --match 'v*' HEAD^ 2>/dev/null || true)
+        if [ -n "$PREV" ]; then
+          echo "ChangeLog for ${PREV}..HEAD"
+          git log --pretty=fuller --date=short "$PREV"..HEAD > ChangeLog
+        else
+          git log --pretty=fuller --date=short > ChangeLog
+        fi
+        head -n 5 ChangeLog
+    - name: Build source tarballs
+      run: |
+        set -euo pipefail
+        autoreconf -i
+        ./configure
+        make dist-bzip2 dist-gzip dist-xz
+        ls -l aria2-*.tar.*
+    - uses: actions/upload-artifact@v4
+      with:
+        name: source
+        path: aria2-*.tar.*
+        if-no-files-found: error
+
+  windows:
+    name: Windows binary (${{ matrix.arch }})
+    needs: version
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - host: i686-w64-mingw32
+          arch: win32bit
+        - host: x86_64-w64-mingw32
+          arch: win64bit
+    steps:
+    - uses: actions/checkout@v7
+    - name: Build aria2c.exe
+      env:
+        HOST: ${{ matrix.host }}
+        ARCH: ${{ matrix.arch }}
+        TAG: ${{ needs.version.outputs.tag }}
+        VERSION: ${{ needs.version.outputs.version }}
+        REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        docker build -f Dockerfile.mingw \
+          --build-arg HOST="$HOST" \
+          --build-arg ARIA2_REPO="$REPO" \
+          --build-arg ARIA2_VERSION="$TAG" \
+          --build-arg ARIA2_REF="refs/tags/$TAG" \
+          -t "aria2-mingw-$HOST" .
+        mkdir -p out
+        docker run --rm -v "$PWD/out:/out" "aria2-mingw-$HOST" cp /aria2/src/aria2c.exe /out
+        mv out/aria2c.exe "aria2-$VERSION-$ARCH.exe"
+        ls -l "aria2-$VERSION-$ARCH.exe"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: windows-${{ matrix.arch }}
+        path: aria2-*.exe
+        if-no-files-found: error
+
+  macos:
+    name: macOS binary
+    needs: version
+    runs-on: macos-14
+    steps:
+    - uses: actions/checkout@v7
+    - name: Install build dependencies
+      run: |
+        brew install cppunit gettext openssl libssh2 c-ares sqlite3 \
+          autoconf automake pkg-config libtool
+    - name: Build aria2c
+      env:
+        VERSION: ${{ needs.version.outputs.version }}
+      run: |
+        set -euo pipefail
+        autoreconf -i
+        ./configure \
+          --without-openssl --without-gnutls --with-appletls \
+          --disable-nls
+        make -j"$(sysctl -n hw.ncpu)"
+        src/aria2c --version
+        ARCH=$(echo "${{ runner.arch }}" | tr '[:upper:]' '[:lower:]')
+        mkdir -p "aria2-$VERSION-osx-$ARCH"
+        cp src/aria2c README.rst COPYING "aria2-$VERSION-osx-$ARCH/"
+        tar czf "aria2-$VERSION-osx-$ARCH.tar.gz" "aria2-$VERSION-osx-$ARCH"
+        ls -l "aria2-$VERSION-osx-$ARCH.tar.gz"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: macos
+        path: aria2-*.tar.gz
+        if-no-files-found: error
+
+  android:
+    name: Android binary
+    needs: version
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v7
+    - name: Build aria2c
+      env:
+        TAG: ${{ needs.version.outputs.tag }}
+        VERSION: ${{ needs.version.outputs.version }}
+        REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        docker build -f Dockerfile.android \
+          --build-arg ARIA2_REPO="$REPO" \
+          --build-arg ARIA2_VERSION="$TAG" \
+          -t aria2-android .
+        mkdir -p out
+        docker run --rm -v "$PWD/out:/out" aria2-android cp /root/build/aria2/src/aria2c /out
+        mv out/aria2c "aria2-$VERSION-android-arm64"
+        ls -l "aria2-$VERSION-android-arm64"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: android
+        path: aria2-*-android-arm64
+        if-no-files-found: error
+
+  publish:
+    name: Create GitHub release
+    needs: [version, source, windows, macos, android]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        path: dist
+        merge-multiple: true
+    - name: List artifacts
+      run: ls -l dist
+    - uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ needs.version.outputs.tag }}
+        generate_release_notes: true
+        fail_on_unmatched_files: true
+        files: dist/*

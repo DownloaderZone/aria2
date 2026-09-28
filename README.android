@@ -31,8 +31,8 @@ https://github.com/jackpal/Android-Terminal-Emulator/).
 How to use
 ----------
 
-See `the online manual
-<https://aria2.github.io/manual/en/html/>`_.
+See the manual sources in ``doc/manual-src``; build the HTML version
+with ``make html``.
 
 Notes
 -----

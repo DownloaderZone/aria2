@@ -3684,7 +3684,7 @@ RPC
 
 СМОТРИТЕ ТАКЖЕ
 --------------
-Веб-сайт проекта: https://aria2.github.io/
+Веб-сайт проекта: https://github.com/DownloaderZone/aria2
 
 Домашняя страница Metalink: http://www.metalinker.org/
 

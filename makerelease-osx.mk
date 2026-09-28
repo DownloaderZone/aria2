@@ -189,8 +189,7 @@ ARIA2_CONFFLAGS = \
 ARIA2_DOCDIR = $(ARIA2_PREFIX)/share/doc/aria2
 ARIA2_DOCS = \
 	     $(ARIA2_DOCDIR)/AUTHORS \
-	     $(ARIA2_DOCDIR)/COPYING \
-	     $(ARIA2_DOCDIR)/NEWS
+	     $(ARIA2_DOCDIR)/COPYING
 ARIA2_CHANGELOG = $(ARIA2_DOCDIR)/Changelog
 
 # Yeah, inlined XML, go figure :p

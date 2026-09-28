@@ -38,10 +38,12 @@ ir assistindo um filme enquanto o download prossegue.  Através da
 verificação (checksum) de partes dos dados dos Metalink's, aria2
 automaticamente valida as partes dos dados durante o download.
 
-A página do projeto está em https://aria2.github.io/.
+A página do projeto está em
+https://github.com/DownloaderZone/aria2.
 
-Veja `aria2 Manual Online <https://aria2.github.io/manual/pt/html/>`_
-para aprender como a usar aria2.
+As fontes do manual (inglês, russo e português) estão em
+``doc/manual-src``.  Execute ``make html`` para gerar o manual HTML;
+consulte a seção `Para Gerar a documentação`_.
 
 Funcionalidades
 ---------------
@@ -74,7 +76,7 @@ Lista de Configurações:
 * Suporte a Cabeçalho HTTP modificado ou personalizado
 * Suporte a Conexões Persistentes
 * FTP através de Proxy HTTP
-* Controle de velocidade Download e Upload (utilização da Banda Rede)
+* Controle de velocidade de Download (utilização da Banda Rede)
 * Interface JSON-RPC (sobre HTTP e WebSocket) / XML-RPC
 * Execução em modo daemon
 * Download Seletivo em múltiplos arquivos Metalink
@@ -92,11 +94,11 @@ Como obter o código fonte
 -------------------------
 
 O código fonte é mantido no Github:
-https://github.com/aria2/aria2
+https://github.com/DownloaderZone/aria2
 
 Para obter o último código fonte, execute o seguinte comando::
 
-    $ git clone git://github.com/aria2/aria2.git
+    $ git clone https://github.com/DownloaderZone/aria2.git
 
 Aria2 será criado no diretório corrente do seu computador com os arquivos fonte.
 
@@ -382,10 +384,8 @@ partir do Android Market (ou compile a partir da fonte e instale). Veja
 Como usar comandos do aria2 no Android
 --------------------------------------
 
-Ver o manual do aria2 online nos seguintes idiomas:
-`Tradução em Português <https://aria2.github.io/manual/pt/html/>`_.
-`Original em Inglês    <https://aria2.github.io/manual/en/html/>`_.
-`Tradução em Russo     <https://aria2.github.io/manual/ru/html/>`_.
+O manual do aria2 está disponível nos idiomas inglês, russo e
+português em ``doc/manual-src``; gere a versão HTML com ``make html``.
 
 Notas sobre uso do aria2 no Android
 -----------------------------------
@@ -449,11 +449,8 @@ A pasta ``pt`` indica o idioma que atualmente pode ser
 certifique-se de que os pré-requisitos de fontes usados pelo latex 
 estejam presentes.
 
-A versão online HTML também está disponível em:
-`Original em Inglês <https://aria2.github.io/manual/en/html/>`_ 
-e nas traduções em:
-(`Português <https://aria2.github.io/manual/pt/html/>`_ e
-`Russo <https://aria2.github.io/manual/ru/html/>`_).
+Não há uma versão online hospedada deste manual; gere-o localmente
+com ``make html`` como descrito acima.
 
 Metalink
 ========
@@ -518,16 +515,14 @@ definida na RFC 6455. O protocolo suportado refere-se a versão 13.
 Referências
 ===========
 
-* `aria2 Manual Inglês 
-  <https://aria2.github.io/manual/en/html/>`_ original inglês
+* `Código fonte do aria2 
+  <https://github.com/DownloaderZone/aria2>`_ 
   
-* `aria2 Manual Russo 
-  <https://aria2.github.io/manual/ru/html/>`_ versão russo
+* `Releases do aria2 
+  <https://github.com/DownloaderZone/aria2/releases>`_ 
   
-* `aria2 Manual Português 
-  <https://aria2.github.io/manual/pt/html/>`_ versão português
-  
-* https://aria2.github.io/
+* `Fontes do manual (en, pt, ru) 
+  <https://github.com/DownloaderZone/aria2/tree/master/doc/manual-src>`_
 * `RFC 959 FILE TRANSFER PROTOCOL (FTP) 
   <http://tools.ietf.org/html/rfc959>`_
 * `RFC 1738 Uniform Resource Locators (URL) 

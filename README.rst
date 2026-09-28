@@ -17,13 +17,15 @@ HTTP(S)/FTP/SFTP at the same time from multiple servers.  Using
 Metalink's chunk checksums, aria2 automatically validates chunks of
 data while downloading a file.
 
-The project page is located at https://aria2.github.io/.
+aria2 2.0.0 removes BitTorrent, DHT and Metalink torrent metadata
+support that earlier aria2 releases offered; only the protocols listed
+above are implemented.
 
-See the `aria2 Online Manual
-<https://aria2.github.io/manual/en/html/>`_ (`Russian translation
-<https://aria2.github.io/manual/ru/html/>`_, `Portuguese
-translation <https://aria2.github.io/manual/pt/html/>`_) to learn
-how to use aria2.
+The project page is located at https://github.com/DownloaderZone/aria2.
+
+The manual sources for the English, Russian and Portuguese translations
+are in ``doc/manual-src``.  Run ``make html`` to build the HTML manual;
+see `Building documentation`_ for details.
 
 Features
 --------
@@ -68,30 +70,30 @@ Here is a list of features:
 * Disk cache to reduce disk activity
 
 
-Versioning and release schedule
--------------------------------
+Versioning and releases
+-----------------------
 
-We use 3 numbers for the aria2 version: MAJOR.MINOR.PATCH.  We will ship
-MINOR updates on the 15th of every month.  We may skip a release if we have
-had no changes since the last release.  The feature and documentation
-freeze happens 10 days before the release day (the 5th day of the month)
-for translation teams.  We will raise an issue about the upcoming
-release around that day.
+We use 3 numbers for the aria2 version: MAJOR.MINOR.PATCH.
 
-We may release PATCH releases between regular releases if we have
-security issues.
+Releases are produced by the ``release`` GitHub Actions workflow in
+``.github/workflows/release.yml``.  Run it from the Actions tab; it
+reads the version from ``configure.ac``, creates and pushes the
+``vX.Y.Z`` tag if it does not exist yet, builds the source tarballs
+and the Windows, macOS and Android binaries, and publishes them all in
+a GitHub Release.
 
-The MAJOR version will stay at 1 for the time being.
+Source packages and pre-built binaries are available at
+https://github.com/DownloaderZone/aria2/releases
 
 How to get source code
 ----------------------
 
 We maintain the source code at Github:
-https://github.com/aria2/aria2
+https://github.com/DownloaderZone/aria2
 
 To get the latest source code, run the following command::
 
-    $ git clone https://github.com/aria2/aria2.git
+    $ git clone https://github.com/DownloaderZone/aria2.git
 
 This will create an aria2 directory in your current directory and source
 files are stored there.
@@ -346,7 +348,7 @@ Cross-compiling Android binary
 In this section, we describe how to build Android binary using Android
 NDK cross-compiler on Debian Linux.
 
-At the time of this writing, Android NDK r21e should compile aria2
+At the time of this writing, Android NDK r25c should compile aria2
 without errors.
 
 ``android-config`` script is a configure script wrapper for Android
@@ -366,7 +368,7 @@ libraries statically.
 ``android-config`` assumes that ``$ANDROID_HOME`` and ``$NDK``
 environment variables are defined.
 
-We currently use Android NDK r21e.  ``$NDK`` should point to the
+We currently use Android NDK r25c.  ``$NDK`` should point to the
 directory to Android NDK.  The build tools will be found under
 ``$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/``.
 
@@ -381,10 +383,8 @@ Building documentation
 `Sphinx <http://sphinx-doc.org/>`_ is used to building the
 documentation. aria2 man pages will be build when you run ``make`` if
 they are not up-to-date.  You can also build an HTML version of the aria2
-man page by ``make html``. The HTML version manual is also available
-`online <https://aria2.github.io/manual/en/html/>`_ (`Russian
-translation <https://aria2.github.io/manual/ru/html/>`_, `Portuguese
-translation <https://aria2.github.io/manual/pt/html/>`_).
+man page by ``make html``.  The manual sources for the English,
+Russian and Portuguese translations are in ``doc/manual-src``.
 
 Metalink
 --------
@@ -458,8 +458,8 @@ documentation to know how to use API.
 References
 ----------
 
-* `aria2 Online Manual <https://aria2.github.io/manual/en/html/>`_
-* https://aria2.github.io/
+* `aria2 source code <https://github.com/DownloaderZone/aria2>`_
+* `aria2 releases <https://github.com/DownloaderZone/aria2/releases>`_
 * `RFC 959 FILE TRANSFER PROTOCOL (FTP) <http://tools.ietf.org/html/rfc959>`_
 * `RFC 1738 Uniform Resource Locators (URL) <http://tools.ietf.org/html/rfc1738>`_
 * `RFC 2428 FTP Extensions for IPv6 and NATs <http://tools.ietf.org/html/rfc2428>`_

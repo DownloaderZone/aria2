@@ -3204,7 +3204,7 @@ Download Paralelo de uma quantidade arbitrária de URI ou Metalink
 Ver Também
 ----------
 
-Site do Projeto aria2: https://aria2.github.io/
+Site do Projeto aria2: https://github.com/DownloaderZone/aria2
 
 Site do Projeto Metalink: http://www.metalinker.org/
 
