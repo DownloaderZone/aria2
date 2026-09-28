@@ -2,12 +2,10 @@
 
 .. meta::
    :description lang=pt: Manual Aria2 em português
-   :keywords: programa para download gratuito, download android, download
+   :keywords: programa para download gratuito,
               linha de comando, download de músicas, download de ftp,
               download http, download https, mac OS/X, windows, linux,
-              manual download aria2, download stream,
-              como compilar programa no android, como executar download no
-              android
+              manual download aria2, download stream
    :author: tatsuhiro.t_at_gmail_dot_com english version
    :author: gsavix@gmail.com tradução para português do brasil
 
@@ -32,7 +30,7 @@ aria2 é um utilitário para download de arquivos. Os protocolos suportados são
 HTTP, HTTPS, FTP, SFTP e Metalink. aria2 pode baixar arquivos de
 múltiplas fontes protocolos e tenta utilizar para isso a máxima banda possível.
 Pode funcionar em diversas plataformas de computadores e sistemas operacionais,
-como por exemplo: GNU Linux, OS X, Windows, Android entre outros. Ao mesmo
+como por exemplo: GNU Linux, OS X, Windows entre outros. Ao mesmo
 tempo pode executar download de HTTP, HTTPS, FTP e SFTP, e você pode
 ir assistindo um filme enquanto o download prossegue.  Através da
 verificação (checksum) de partes dos dados dos Metalink's, aria2
@@ -218,8 +216,7 @@ Após a configuração feita, execute ``make`` para compilar o programa::
     $ make
 
 Ver `Compilação Cross Windows binário`_ para Criar Binário para
-Windows.  Ver `Compilação Cross Android binário`_ para criar
-Binário para Android.
+Windows.
 O script configure verifica as bibliotecas
 disponíveis e habilita
 ou desabilita as funcionalidades na maior abrangência possivel, pois
@@ -300,134 +297,6 @@ Algumas variáveis de ambiente precisam ser ajustadas para compilar:
 Por exemplo, para construir um binário para 64bits utilize:: 
 
     $ HOST=x86_64-w64-mingw32 ./mingw-config
-
-.. index:: triple:  compilação cross; android; aria2c;
-           pair:    configuração; compilação android
-
-Compilação Cross Android binário
---------------------------------
-
-Nessa seção, descrevemos como construir um binário usando o compilador-cross
-NDD no Linux Debian.
-
-``android-config`` é um script para configurar compilação para Android, o qual
-assume que as seguintes bibliotecas também foram construídas para
-compilador-cross:
-
-* c-ares
-* openssl
-* expat
-
-Quando compilando as bibliotecas, certifique-se que o compartilhamento (share)
-esteja desabilitado e confirme que somente biblioteca estática está habilitado.
-A compilação será feita somente com bibliotecas estáticas.
-
-A bibliteca zlib que vem com o Android NDK, portanto não é necessário
-compilar uma zlib nova.
-
-``android-config`` assume os seguintes pontos:
-
-* Android NDK está instalado no local definido pela variável de ambiente
-  ``$ANDROID_HOME``.  Consultar seção "3/ Chamando o compilador (jeito fácil):"
-  no Android NDK
-  ``docs/STANDALONE-TOOLCHAIN.html`` para instalar (toolchain) personalizada.
-* Bibliotecas dependentes devem estar instaladas em 
-  ``$ANDROID_HOME/usr/local``.
-
-Antes executar ``android-config`` e ``android-make``, a variável de ambiente
-``$ANDOIRD_HOME`` deve apontar para o caminho correto.
-
-Após ``android-config``, executar ``android-make`` para compilar os fontes.
-
-.. index::	triple:    instalação; aria2; android;
-                triple:    execução; aria2; android;
-                triple:    aria2; emulador terminal; android;
-                triple:    jackpal; emulador terminal; android;
-                triple:    script; execução aria2; android;
-
-
-aria2 para dispositivos Android
-===============================
-
-aria2 é utilitário para download leve e multi-protocolo bem como
-multi-fontes operado através da linha de comando de um emulador de terminal
-que é executado no android. Há Suporte para downloads do tipo HTTP, HTTPS, FTP,
-SFTP e Metalink.
-
-Instalando aria2 no Android
----------------------------
-
-aria2 não é uma aplicação Android Java. aria2 é uma aplicação escrita
-em C++ nativo e opera em modo linha de comando.  Não é necessário ter
-acesso ao usuário 'root' para usar aria2.  Como já dito, aria2 é um
-programa de linha de comando e por isso é necessário um emulador
-de terminal, portanto antes instale um emulador de Terminal Android a
-partir do Android Market (ou compile a partir da fonte e instale). Veja
-`Github jackpal <https://github.com/jackpal/Android-Terminal-Emulator/>`_.
-
-1. Copiar o executável do aria2c para ``/mnt/sdcard`` do seu dispositivo.
-2. Executar Emulador Terminal Android.
-3. Criar diretório ``mkdir /data/data/jackpal.androidterm/aria2``
-4. Anexar aplicação 
-   ``cat /mnt/sdcard/aria2c > /data/data/jackpal.androidterm/aria2/aria2c``
-5. Habilitar modo execução 
-   ``chmod 744 /data/data/jackpal.androidterm/aria2/aria2c``
-6. Adicionar o seguintes comandos ao Emulador de Terminal Android
-   Terminal Emulator::
-
-       export HOME=/data/data/jackpal.androidterm/aria2; cd $HOME
-
-7. Sair do Emulador de Terminal Android.
-8. Executar novamente o Emulador de Terminal Android.
-9. Execute aria2c chamando o comando ``./aria2c -v``
-
-Como usar comandos do aria2 no Android
---------------------------------------
-
-O manual do aria2 está disponível nos idiomas inglês, russo e
-português em ``doc/manual-src``; gere a versão HTML com ``make html``.
-
-Notas sobre uso do aria2 no Android
------------------------------------
-
-O executável aria2c foi gerado usando android-ndk-r8d.
-
-As seguintes bibliotecas foram ligadas estaticamente.
-
- * openssl 1.0.1e
- * expat 2.1.0
- * c-ares 1.9.1
-
-Como o Android não possuem ``/etc/resolv.conf``, c-ares (resolvedor
-assíncrono de DNS) é desabilitado por padrão. Muitas vezes a resolução
-de nomes é lenta, recomenda-se habilitar c-ares. Para desabilitar use
-:option:``--async-dns`` e especifique os servidores DNS usando
-opção :option:``--async-dns-server``, como abaixo::
-
-  --async-dns --async-dns-server=`getprop meu.dns1`,`getprop meu.dns2`
-
-.. index::       double; servidor dns; android;
-
-Para não se entediar digitando estes parâmetros, toda vez que usar aria2c,
-o seguinte script shell pode ser útil::
-
-    #!/system/bin/sh
-    /data/data/jackpal.androidterm/aria2c \
-      --async-dns \
-      --async-dns-server=`getprop meu.dns1`,`getprop meu.dns2` \
-      "$@"
-
-Lembrar de tornar este script executável, através do comando chmod.
-Também substitua meu.dns1 e meu.dns2 pelos DNS reais que você quer.
-Exemplo: (``chmod 744 /path-para-o/scriptSCRIPT``)
-
-Problemas Conhecidos com o aria2c no Android
---------------------------------------------
-
-* Como Android não tem ``/dev/stdout``, ``-l-`` não funciona.
-
-* Em alguns casos o Emulador de Terminal Android, para de atualizar a console.
-  É como se o aria2c congelasse, mas o aria2c continua executando normalmente.
 
 Para Gerar a documentação
 =========================

@@ -79,7 +79,7 @@ Releases are produced by the ``release`` GitHub Actions workflow in
 ``.github/workflows/release.yml``.  Run it from the Actions tab; it
 reads the version from ``configure.ac``, creates and pushes the
 ``vX.Y.Z`` tag if it does not exist yet, builds the source tarballs
-and the Windows, macOS and Android binaries, and publishes them all in
+and the Windows and macOS binaries, and publishes them all in
 a GitHub Release.
 
 Source packages and pre-built binaries are available at
@@ -247,7 +247,6 @@ After configuration is done, run ``make`` to compile the program::
     $ make
 
 See `Cross-compiling Windows binary`_ to create a Windows binary.
-See `Cross-compiling Android binary`_ to create an Android binary.
 
 The configure script checks available libraries and enables as many
 features as possible except for experimental features not enabled by
@@ -341,41 +340,6 @@ For example, to build a 64bit binary do this::
 If you want libaria2 dll with ``--enable-libaria2``, then don't use
 ``ARIA2_STATIC=yes`` and prepare the DLL version of external
 libraries.
-
-Cross-compiling Android binary
-------------------------------
-
-In this section, we describe how to build Android binary using Android
-NDK cross-compiler on Debian Linux.
-
-At the time of this writing, Android NDK r25c should compile aria2
-without errors.
-
-``android-config`` script is a configure script wrapper for Android
-build.  We use it to create an official Android build.  This script
-assumes the following libraries have been built for cross-compile:
-
-* c-ares
-* openssl
-* expat
-* zlib
-* libssh2
-
-When building the above libraries, make sure that disable shared
-library and enable only static library. We are going to link those
-libraries statically.
-
-``android-config`` assumes that ``$ANDROID_HOME`` and ``$NDK``
-environment variables are defined.
-
-We currently use Android NDK r25c.  ``$NDK`` should point to the
-directory to Android NDK.  The build tools will be found under
-``$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/``.
-
-All the dependent libraries must be installed under
-``$ANDROID_HOME/usr/local``.
-
-After ``android-config``, run ``make`` to compile sources.
 
 Building documentation
 ----------------------

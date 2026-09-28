@@ -151,36 +151,9 @@ jobs:
         path: aria2-*.tar.gz
         if-no-files-found: error
 
-  android:
-    name: Android binary
-    needs: version
-    runs-on: ubuntu-22.04
-    steps:
-    - uses: actions/checkout@v7
-    - name: Build aria2c
-      env:
-        TAG: ${{ needs.version.outputs.tag }}
-        VERSION: ${{ needs.version.outputs.version }}
-        REPO: ${{ github.repository }}
-      run: |
-        set -euo pipefail
-        docker build -f Dockerfile.android \
-          --build-arg ARIA2_REPO="$REPO" \
-          --build-arg ARIA2_VERSION="$TAG" \
-          -t aria2-android .
-        mkdir -p out
-        docker run --rm -v "$PWD/out:/out" aria2-android cp /root/build/aria2/src/aria2c /out
-        mv out/aria2c "aria2-$VERSION-android-arm64"
-        ls -l "aria2-$VERSION-android-arm64"
-    - uses: actions/upload-artifact@v4
-      with:
-        name: android
-        path: aria2-*-android-arm64
-        if-no-files-found: error
-
   publish:
     name: Create GitHub release
-    needs: [version, source, windows, macos, android]
+    needs: [version, source, windows, macos]
     runs-on: ubuntu-22.04
     permissions:
       contents: write

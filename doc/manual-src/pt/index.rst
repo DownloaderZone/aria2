@@ -6,7 +6,7 @@
 
 .. meta::
    :description lang=pt: Manual Aria2 em português
-   :keyword: programa para download gratuito, download android, download
+   :keyword: programa para download gratuito,
              linha de comando, download de músicas, download de ftp,
              download http, download https, mac OS/X, windows, linux,
              manual download aria2, download stream

@@ -39,18 +39,4 @@ release_mingw i686-w64-mingw32 win-32bit
 # mingw 64bit
 release_mingw x86_64-w64-mingw32 win-64bit
 
-# android
-mkdir -p android-out
-
-docker build \
-       --build-arg ARIA2_VERSION=v$VERSION \
-       -t aria2-android - < Dockerfile.android
-
-docker run --rm -it -v $PWD/android-out:/out aria2-android \
-       cp /root/build/aria2/src/aria2c /out
-
-./android-release
-
-rm -rf android-out
-
 # OSX builds are created separately using makerelease-osx.mk
