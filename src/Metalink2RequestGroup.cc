@@ -60,10 +60,6 @@
 #include "Signature.h"
 #include "download_handlers.h"
 #include "RequestGroupCriteria.h"
-#ifdef ENABLE_BITTORRENT
-#  include "BtDependency.h"
-#  include "download_helper.h"
-#endif // ENABLE_BITTORRENT
 #include "Checksum.h"
 #include "ChunkChecksum.h"
 
@@ -89,23 +85,6 @@ public:
       break;
     default:
       break;
-    }
-  }
-};
-} // namespace
-
-namespace {
-class FindBitTorrentUri {
-public:
-  FindBitTorrentUri() = default;
-
-  bool operator()(const std::shared_ptr<MetalinkResource>& resource)
-  {
-    if (resource->type == MetalinkResource::TYPE_BITTORRENT) {
-      return true;
-    }
-    else {
-      return false;
     }
   }
 };
@@ -205,35 +184,6 @@ void Metalink2RequestGroup::createRequestGroup(
     auto& metaurl = entryGroup.first;
     auto& mes = entryGroup.second;
     A2_LOG_INFO(fmt("Processing metaurl group metaurl=%s", metaurl.c_str()));
-#ifdef ENABLE_BITTORRENT
-    std::shared_ptr<RequestGroup> torrentRg;
-    if (!metaurl.empty()) {
-      std::vector<std::string> uris;
-      uris.push_back(metaurl);
-      {
-        std::vector<std::shared_ptr<RequestGroup>> result;
-        createRequestGroupForUri(result, optionTemplate, uris,
-                                 /* ignoreForceSequential = */ true,
-                                 /* ignoreLocalPath = */ true);
-        if (!result.empty()) {
-          torrentRg = result[0];
-        }
-      }
-      if (torrentRg) {
-        torrentRg->setNumConcurrentCommand(1);
-        torrentRg->clearPreDownloadHandler();
-        torrentRg->clearPostDownloadHandler();
-        // remove "metalink" from Accept Type list to avoid loop in
-        // transparent metalink
-        torrentRg->getDownloadContext()->setAcceptMetalink(false);
-        // make it in-memory download
-        torrentRg->addPreDownloadHandler(
-            download_handlers::getMemoryPreDownloadHandler());
-        torrentRg->markInMemoryDownload();
-        groups.push_back(torrentRg);
-      }
-    }
-#endif // ENABLE_BITTORRENT
     auto option = util::copy(optionTemplate);
     auto rg = std::make_shared<RequestGroup>(GroupId::create(), option);
     std::shared_ptr<DownloadContext> dctx;
@@ -288,7 +238,6 @@ void Metalink2RequestGroup::createRequestGroup(
     }
     else {
       dctx = std::make_shared<DownloadContext>();
-      // piece length is overridden by the one in torrent file.
       dctx->setPieceLength(option->getAsInt(PREF_PIECE_LENGTH));
       std::vector<std::shared_ptr<FileEntry>> fileEntries;
       int64_t offset = 0;
@@ -330,33 +279,6 @@ void Metalink2RequestGroup::createRequestGroup(
     // remove "metalink" from Accept Type list to avoid loop in
     // transparent metalink
     dctx->setAcceptMetalink(false);
-#ifdef ENABLE_BITTORRENT
-    // Inject dependency between rg and torrentRg here if
-    // torrentRg is true
-    if (torrentRg) {
-      auto dep = std::make_shared<BtDependency>(rg.get(), torrentRg);
-      rg->dependsOn(dep);
-      torrentRg->belongsTo(rg->getGID());
-      // metadata download may take very long time. If URIs are
-      // available, give up metadata download in at most 30 seconds.
-      const time_t btStopTimeout = 30;
-      time_t currentBtStopTimeout =
-          torrentRg->getOption()->getAsInt(PREF_BT_STOP_TIMEOUT);
-      if (currentBtStopTimeout == 0 || currentBtStopTimeout > btStopTimeout) {
-        bool allHaveUri = true;
-        for (auto& fe : dctx->getFileEntries()) {
-          if (fe->getRemainingUris().empty()) {
-            allHaveUri = false;
-            break;
-          }
-        }
-        if (allHaveUri) {
-          torrentRg->getOption()->put(PREF_BT_STOP_TIMEOUT,
-                                      util::itos(btStopTimeout));
-        }
-      }
-    }
-#endif // ENABLE_BITTORRENT
     groups.push_back(rg);
   }
 }

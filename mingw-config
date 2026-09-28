@@ -48,7 +48,6 @@
 # In this configuration, the following dependent libraries are used:
 #
 # * c-ares
-# * gmp
 # * expat
 # * sqlite3
 # * zlib
@@ -70,7 +69,6 @@ test -z "$PREFIX" && PREFIX=/usr/local/$HOST
     --without-libxml2 \
     --with-libexpat \
     --with-libz \
-    --with-libgmp \
     --with-libssh2 \
     --without-libgcrypt \
     --without-libnettle \

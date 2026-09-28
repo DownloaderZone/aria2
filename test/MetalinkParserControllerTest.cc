@@ -109,17 +109,6 @@ void MetalinkParserControllerTest::testResourceTransaction_withBaseUri()
   ctrl.newResourceTransaction();
   ctrl.setURLOfResource("aria2.tar.bz2");
   ctrl.commitResourceTransaction();
-#ifdef ENABLE_BITTORRENT
-  ctrl.newMetaurlTransaction();
-  ctrl.setURLOfMetaurl("/meta/aria2.tar.bz2.torrent");
-  ctrl.setMediatypeOfMetaurl("torrent");
-  ctrl.commitMetaurlTransaction();
-  ctrl.newMetaurlTransaction();
-  ctrl.setURLOfMetaurl(
-      "magnet:?xt=urn:btih:248d0a1cd08284299de78d5c1ed359bb46717d8c");
-  ctrl.setMediatypeOfMetaurl("torrent");
-  ctrl.commitMetaurlTransaction();
-#endif // ENABLE_BITTORRENT
   ctrl.commitEntryTransaction();
   {
     auto m = ctrl.getResult();
@@ -129,16 +118,6 @@ void MetalinkParserControllerTest::testResourceTransaction_withBaseUri()
                          res->url);
     CPPUNIT_ASSERT_EQUAL(MetalinkResource::TYPE_HTTP, res->type);
 
-#ifdef ENABLE_BITTORRENT
-    CPPUNIT_ASSERT_EQUAL((size_t)2, m->getEntries()[0]->metaurls.size());
-    CPPUNIT_ASSERT_EQUAL(std::string("http://base/meta/aria2.tar.bz2.torrent"),
-                         m->getEntries()[0]->metaurls[0]->url);
-
-    CPPUNIT_ASSERT_EQUAL(
-        std::string(
-            "magnet:?xt=urn:btih:248d0a1cd08284299de78d5c1ed359bb46717d8c"),
-        m->getEntries()[0]->metaurls[1]->url);
-#endif // ENABLE_BITTORRENT
   }
 }
 
@@ -152,31 +131,11 @@ void MetalinkParserControllerTest::testMetaurlTransaction()
   ctrl.setPriorityOfMetaurl(999);
   ctrl.setNameOfMetaurl("mybirthdaycake");
   ctrl.commitEntryTransaction();
-#ifdef ENABLE_BITTORRENT
-  ctrl.newEntryTransaction();
-  ctrl.newMetaurlTransaction();
-  ctrl.cancelMetaurlTransaction();
-  ctrl.commitEntryTransaction();
-  {
-    auto m = ctrl.getResult();
-    CPPUNIT_ASSERT_EQUAL((size_t)2, m->getEntries().size());
-    CPPUNIT_ASSERT_EQUAL((size_t)1, m->getEntries()[0]->metaurls.size());
-    CPPUNIT_ASSERT_EQUAL((size_t)0, m->getEntries()[1]->metaurls.size());
-
-    auto& metaurl = m->getEntries()[0]->metaurls[0];
-    CPPUNIT_ASSERT_EQUAL(std::string("http://example.org/chocolate.torrent"),
-                         metaurl->url);
-    CPPUNIT_ASSERT_EQUAL(std::string("torrent"), metaurl->mediatype);
-    CPPUNIT_ASSERT_EQUAL(std::string("mybirthdaycake"), metaurl->name);
-    CPPUNIT_ASSERT_EQUAL(999, metaurl->priority);
-  }
-#else  // !ENABLE_BITTORRENT
   {
     auto m = ctrl.getResult();
     CPPUNIT_ASSERT_EQUAL((size_t)1, m->getEntries().size());
     CPPUNIT_ASSERT_EQUAL((size_t)0, m->getEntries()[0]->metaurls.size());
   }
-#endif // !ENABLE_BITTORRENT
 }
 
 void MetalinkParserControllerTest::testChecksumTransaction()

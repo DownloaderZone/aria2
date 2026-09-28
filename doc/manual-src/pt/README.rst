@@ -3,9 +3,9 @@
 .. meta::
    :description lang=pt: Manual Aria2 em português
    :keywords: programa para download gratuito, download android, download
-              bittorrent, download linha de comando, download de músicas,
-              download de ftp, download http, download https, mac OS/X,
-              windows, linux, manual download aria2, torrent, download stream,
+              linha de comando, download de músicas, download de ftp,
+              download http, download https, mac OS/X, windows, linux,
+              manual download aria2, download stream,
               como compilar programa no android, como executar download no
               android
    :author: tatsuhiro.t_at_gmail_dot_com english version
@@ -29,15 +29,14 @@ conta e risco.
 Introdução
 ----------
 aria2 é um utilitário para download de arquivos. Os protocolos suportados são
-HTTP, HTTPS, FTP, BitTorrent e Metalink. aria2 pode baixar arquivos de
+HTTP, HTTPS, FTP, SFTP e Metalink. aria2 pode baixar arquivos de
 múltiplas fontes protocolos e tenta utilizar para isso a máxima banda possível.
 Pode funcionar em diversas plataformas de computadores e sistemas operacionais,
 como por exemplo: GNU Linux, OS X, Windows, Android entre outros. Ao mesmo
-tempo pode executar download de HTTP, HTTPS, FTP e BitTorrent enquanto estes
-dados podem ser disponibilizados (uploaded) ao mesmo tempo para o BitTorrent ou
-para você ir assistindo um filme enquanto o download prossegue.  Através da
+tempo pode executar download de HTTP, HTTPS, FTP e SFTP, e você pode
+ir assistindo um filme enquanto o download prossegue.  Através da
 verificação (checksum) de partes dos dados dos Metalink's, aria2
-automaticamente valida partes (chunks) do BitTorrent.
+automaticamente valida as partes dos dados durante o download.
 
 A página do projeto está em https://aria2.github.io/.
 
@@ -50,10 +49,10 @@ Funcionalidades
 Lista de Configurações:
 
 * Interface de linha de comando
-* Download arquivos protocolos HTTP, HTTPS, FTP, BitTorrent
+* Download arquivos protocolos HTTP, HTTPS, FTP, SFTP
 * Download Segmentado
-* Metalink versão 4 (RFC 5854) suporte (HTTP, FTP, BitTorrent)
-* Metalink versão 3 suporte (HTTP, FTP, BitTorrent)
+* Metalink versão 4 (RFC 5854) suporte (HTTP, FTP, SFTP)
+* Metalink versão 3 suporte (HTTP, FTP, SFTP)
 * Metalink (RFC 6249) suporte (HTTP)
 * Implementação HTTP/1.1
 * Suporte Proxy HTTP Proxy
@@ -76,18 +75,9 @@ Lista de Configurações:
 * Suporte a Conexões Persistentes
 * FTP através de Proxy HTTP
 * Controle de velocidade Download e Upload (utilização da Banda Rede)
-* Extensões BitTorrent: Conexão rápida, DHT, PEX, MSE/PSE, Multi-Tracker
-* BitTorrent `WEB-Seeding <http://getright.com/seedtorrent.html>`_. aria2
-  faz requisições de mais de uma parte de um (chunk) para reduzir sobreposições
-  de requisições. Também permite requisições pipeline com tamanho especificado
- 
-* BitTorrent Local Peer Discovery
-* Atualização ou Modificação (Rename) de estrutura de diretórios de downloads
-  BitTorrent já finalizados
- 
 * Interface JSON-RPC (sobre HTTP e WebSocket) / XML-RPC
 * Execução em modo daemon
-* Download Seletivosem múltiplos arquivos torrent/Metalink
+* Download Seletivo em múltiplos arquivos Metalink
 * Validação e checksum de parte (Chunk) em Metalink
 * Desabilidar download segmentado em Metalink
 * Suporte a Netrc
@@ -119,7 +109,6 @@ Dependências
 funcionalidade           dependência
 ======================== ========================================
 HTTPS                    GnuTLS ou OpenSSL
-BitTorrent               libnettle+libgmp ou libgcrypt ou OpenSSL
 Metalink                 libxml2 ou Expat.
 Checksum                 libnettle ou libgcrypt ou OpenSSL
 gzip, deflate em HTTP    zlib
@@ -156,8 +145,8 @@ São necessárias as seguintes configurações de bibliotecas SSl e crypto:
 * GnuTLS + libgcrypt
 * GnuTLS + libnettle
 
-BitTorrent e Metalink podem ser desabilitados fornecendo-se as opções
-``--disable-bittorrent`` e ``--disable-metalink`` ao executar o script 
+Metalink pode ser desabilitado fornecendo-se a opção
+``--disable-metalink`` ao executar o script 
 ./configure.
 
 
@@ -170,23 +159,22 @@ Como fazer o build
 Para fazer o build do aria2 a partir dos fontes, instalar antes
 pacotes de desenvolvimento ( o nome pode variar nas distribuições):
 
-* libgnutls-dev    (Requerido para suporte HTTPS, BitTorrent, Checksum)
-* nettle-dev       (Requerido para suporte BitTorrent, Checksum)
-* libgmp-dev       (Requerido para suporte BitTorrent)
+* libgnutls-dev    (Requerido para suporte HTTPS, Checksum)
+* nettle-dev       (Requerido para suporte Checksum)
 * libc-ares-dev    (Requerido para suporte DNS async DNS )
 * libxml2-dev      (Requerido para suporte Metalink)
 * zlib1g-dev       (Requerido para suporte em HTTP decodificação gzip e deflate)
 * libsqlite3-dev   (Requerido para suporte cookie Firefox3 / Chromium)
 
-Você pode usar libgcrypt-dev ao invés de nettle-dev e libgmp-dev:
+Você pode usar libgcrypt-dev ao invés de nettle-dev:
 
-* libgpg-error-dev (Requerido para suporte BitTorrent, Checksum)
-* libgcrypt-dev    (Requerido para suporte BitTorrent, Checksum)
+* libgpg-error-dev (Requerido para suporte Checksum)
+* libgcrypt-dev    (Requerido para suporte Checksum)
 
 Pode ser usado libssl-dev ao invés de
-libgnutls-dev, nettle-dev, libgmp-dev, libgpg-error-dev e libgcrypt-dev:
+libgnutls-dev, nettle-dev, libgpg-error-dev e libgcrypt-dev:
 
-* libssl-dev       (Requerido para suporte Checksum de HTTPS, BitTorrent )
+* libssl-dev       (Requerido para suporte HTTPS, Checksum)
 
 Pode ser usado libexpat1-dev ao invés de libxml2-dev:
 
@@ -362,7 +350,7 @@ aria2 para dispositivos Android
 aria2 é utilitário para download leve e multi-protocolo bem como
 multi-fontes operado através da linha de comando de um emulador de terminal
 que é executado no android. Há Suporte para downloads do tipo HTTP, HTTPS, FTP,
-BitTorrent e Metalink.
+SFTP e Metalink.
 
 Instalando aria2 no Android
 ---------------------------
@@ -467,70 +455,10 @@ e nas traduções em:
 (`Português <https://aria2.github.io/manual/pt/html/>`_ e
 `Russo <https://aria2.github.io/manual/ru/html/>`_).
 
-BitTorrrent
-===========
-
-Sobre Nome de arquivos
-----------------------
-O nome do arquivo que será baixado é determinado da seguinte maneira:
-
-modo arquivo simples
-    O a chave "name" está presento no arquivo .torrent, o nome do
-    arquivo será o valor da chave "name". De outra maneira o nome
-    do arquivo será baseado no arquivo .torrent mais o sufixo
-    ".file". Exemplo: arquivo .torrent é "brasil.torrrent", então
-    o nome do arquivo baixado será: "brasil.torrent.file".  O 
-    diretório onde será armazenado o arquivo pode ser especificado
-    através da opção -d.
-
-modo arquivos múltiplos
-    A estrutura completa diretório/arquivo mencionada no arquivo .torrent será
-    creada. O diretório base que conterá toda estrutura de diretórios e 
-    arquivos baixados, pode ser especificado através da opção -d.
-    Antes do download iniciar a estrutura completa dos diretórios necessários
-    ao download será criada. Por padrão aria2 abre no mínimo 100 arquivos 
-    mencionados no arquivo .torrent e diretamente executa gravação e leitura 
-    desses arquivos. O número máximo de arquivos para serem abertos 
-    simultaneamente pode ser controlado através da opção
-    :option:``--bt-max-open-files``.
-
-DHT
----
-
-aria2 suporte DHT. Por padrão, a tabela de roteamento	
-para IPv4 DHT é salva em ``$HOME/.aria2/dht.dat`` e a tabela de
-roteamento para IPv6 DHT é salva em ``$HOME/.aria2/dht6.dat``.
-aria2 utiliza o mesmo número de porta para ouvir ambos
-IPv4 e IPv6 DHT.
-
-Rastreador UDP
---------------
- 
-Rastreador UDP é habilitado quando DHT IPv4 é habilitado. O número
-da porta do rastreador UDP é compartilhado com DHT. Usar opção
-:option:``--dht-listen-port`` para modificar o número da porta.
-
-Outras informações importantes
-------------------------------
-
-* Se a opção -o é usada para mudar o nome do arquivo de saida
-  .torrent não o nome do arquivo dentro do arquivo .torrent.
-  Para esta finalidade utilizar opção :option:``--index-out``.
-* Os números de portas padrões que o aria2 utiliza para TCP e UDP
-  estão no intervalo de 6881 até 6999 (6881-6999).
-* aria2 não configura automaticamente port-forwarding.
-  Por favor configurar manualmente seu roteador ou firewall.
-* O número máximo de é 55. Este limite pode ser excedido quando
-  a taxa de download é muito baixa. Esta taxa de download pode ser
-  ajustada com a opção :option:``--bt-request-peer-speed-limit``.
-* Desde a versão 0.10.0, aria2 parou de enviar mensagem de
-  requisição após o download seletivo completar-se.
-
-
 Metalink
 ========
 
-A implementação atual suporte HTTP, HTTPS, FTP e BitTorrent.  Outros
+A implementação atual suporte HTTP, HTTPS, FTP e SFTP.  Outros
 protocolos P2P são ignorados. São suportados documentos das versões
 Metalink4 e Metalink 3.0.
 
@@ -552,15 +480,10 @@ Se uma assinatura (certificado) é incluida em um arquivo Metalink,
 aria2 salva a assinatura como um arquivo após a conclusão do download.
 O nome do arquivo terá o sufixo ".sig". Caso já exista não será salvo.
 
-Em torrent de múltiplos arquivos Metalink4, podem aparecer no elemento
-metalink:metaurl.  Uma vez que aria2 não faz download de 2 Torrents
-iguais ao mesmo tempo, aria2 agrupa arquivos em elementos metalink:file
-os quais tem o mesmo metaurl BitTorrent e serão baixados de um
-simples BitTorrent (swarm).
-Isto basicamente ocorre para download de multiplos arquivos Torrent quando
-há seleção de arquivo(s), portanto arquivos adjacentes que não estão
-no documento Metalink mas que compartilham a mesma (peça ou pedaço)
-do arquivo selecionado também serão baixados e criados.
+Em Metalink4, um elemento metalink:metaurl pode apontar para um tipo de
+recurso que aria2 não suporta, tais como um download BitTorrent.  Esses
+recursos são ignorados, e aria2 baixa o arquivo utilizando as outras URIs
+encontradas no documento.
 
 Se uma URI relativa é especificada em um elemento metalink:url ou
 metalink:metaurl, aria2 usa a URI do arquivo Metalink como URI base
@@ -625,33 +548,6 @@ Referências
 * `RFC 6265 HTTP State Management Mechanism 
   <http://tools.ietf.org/html/rfc6265>`_
 * `RFC 6455 The WebSocket Protocol <http://tools.ietf.org/html/rfc6455>`_
-
-* `The BitTorrent Protocol Specification 
-  <http://www.bittorrent.org/beps/bep_0003.html>`_
-* `BitTorrent: DHT Protocol 
-  <http://www.bittorrent.org/beps/bep_0005.html>`_
-* `BitTorrent: Fast Extension 
-  <http://www.bittorrent.org/beps/bep_0006.html>`_
-* `BitTorrent: IPv6 Tracker Extension 
-  <http://www.bittorrent.org/beps/bep_0007.html>`_
-* `BitTorrent: Extension for Peers to Send Metadata Files 
-  <http://www.bittorrent.org/beps/bep_0009.html>`_
-* `BitTorrent: Extension Protocol 
-  <http://www.bittorrent.org/beps/bep_0010.html>`_
-* `BitTorrent: Multitracker Metadata Extension 
-  <http://www.bittorrent.org/beps/bep_0012.html>`_
-* `BitTorrent: WebSeed - HTTP/FTP Seeding (GetRight style) 
-  <http://www.bittorrent.org/beps/bep_0019.html>`_
-* `BitTorrent: Private Torrents 
-  <http://www.bittorrent.org/beps/bep_0027.html>`_
-* `BitTorrent: BitTorrent DHT Extensions for IPv6 
-  <http://www.bittorrent.org/beps/bep_0032.html>`_
-  
-* `BitTorrent: Message Stream Encryption 
-  <http://wiki.vuze.com/w/Message_Stream_Encryption>`_
-  
-* `Kademlia: A Peer-to-peer Information System Based on the  XOR Metric
-  <http://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf>`_
 
 versão revisada  em 30.março.2013    por gsavix@gmail.com
 

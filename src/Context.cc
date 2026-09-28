@@ -71,9 +71,6 @@
 #include "console.h"
 #include "UriListParser.h"
 #include "message_digest_helper.h"
-#ifdef ENABLE_BITTORRENT
-#  include "bittorrent_helper.h"
-#endif // ENABLE_BITTORRENT
 #ifdef ENABLE_METALINK
 #  include "metalink_helper.h"
 #  include "MetalinkEntry.h"
@@ -83,18 +80,6 @@ extern char* optarg;
 extern int optind, opterr, optopt;
 
 namespace aria2 {
-
-#ifdef ENABLE_BITTORRENT
-namespace {
-void showTorrentFile(const std::string& uri)
-{
-  auto op = std::make_shared<Option>();
-  auto dctx = std::make_shared<DownloadContext>();
-  bittorrent::load(uri, dctx, op);
-  bittorrent::print(*global::cout(), dctx);
-}
-} // namespace
-#endif // ENABLE_BITTORRENT
 
 #ifdef ENABLE_METALINK
 namespace {
@@ -110,7 +95,7 @@ void showMetalinkFile(const std::string& uri, const std::shared_ptr<Option>& op)
 } // namespace
 #endif // ENABLE_METALINK
 
-#if defined(ENABLE_BITTORRENT) || defined(ENABLE_METALINK)
+#if defined(ENABLE_METALINK)
 namespace {
 void showFiles(const std::vector<std::string>& uris,
                const std::shared_ptr<Option>& op)
@@ -121,20 +106,14 @@ void showFiles(const std::vector<std::string>& uris,
     printf(MSG_SHOW_FILES, (uri).c_str());
     printf("\n");
     try {
-#  ifdef ENABLE_BITTORRENT
-      if (dt.guessTorrentFile(uri)) {
-        showTorrentFile(uri);
-      }
-      else
-#  endif // ENABLE_BITTORRENT
-#  ifdef ENABLE_METALINK
-          if (dt.guessMetalinkFile(uri)) {
+#ifdef ENABLE_METALINK
+      if (dt.guessMetalinkFile(uri)) {
         showMetalinkFile(uri, op);
       }
       else
-#  endif // ENABLE_METALINK
+#endif // ENABLE_METALINK
       {
-        printf("%s\n\n", MSG_NOT_TORRENT_METALINK);
+        printf("%s\n\n", MSG_NOT_METALINK);
       }
     }
     catch (RecoverableException& e) {
@@ -143,7 +122,7 @@ void showFiles(const std::vector<std::string>& uris,
   }
 }
 } // namespace
-#endif // ENABLE_BITTORRENT || ENABLE_METALINK
+#endif // ENABLE_METALINK
 
 extern error_code::Value option_processing(Option& option, bool standalone,
                                            std::vector<std::string>& uris,
@@ -164,10 +143,6 @@ Context::Context(bool standalone, int argc, char** argv, const KeyVals& options)
       throw DL_ABORT_EX("Option processing failed");
     }
   }
-#ifdef ENABLE_BITTORRENT
-  bittorrent::generateStaticPeerId(op->get(PREF_PEER_ID_PREFIX));
-  bittorrent::generateStaticPeerAgent(op->get(PREF_PEER_AGENT));
-#endif // ENABLE_BITTORRENT
   LogFactory::setLogFile(op->get(PREF_LOG));
   LogFactory::setLogLevel(op->get(PREF_LOG_LEVEL));
   LogFactory::setConsoleLogLevel(op->get(PREF_CONSOLE_LOG_LEVEL));
@@ -245,19 +220,6 @@ Context::Context(bool standalone, int argc, char** argv, const KeyVals& options)
   }
   std::vector<std::shared_ptr<RequestGroup>> requestGroups;
   std::shared_ptr<UriListParser> uriListParser;
-#ifdef ENABLE_BITTORRENT
-  if (!op->blank(PREF_TORRENT_FILE)) {
-    if (op->get(PREF_SHOW_FILES) == A2_V_TRUE) {
-      showTorrentFile(op->get(PREF_TORRENT_FILE));
-      return;
-    }
-    else {
-      createRequestGroupForBitTorrent(requestGroups, op, args,
-                                      op->get(PREF_TORRENT_FILE));
-    }
-  }
-  else
-#endif // ENABLE_BITTORRENT
 #ifdef ENABLE_METALINK
       if (!op->blank(PREF_METALINK_FILE)) {
     if (op->get(PREF_SHOW_FILES) == A2_V_TRUE) {
@@ -277,7 +239,7 @@ Context::Context(bool standalone, int argc, char** argv, const KeyVals& options)
       else {
         createRequestGroupForUriList(requestGroups, op);
       }
-#if defined(ENABLE_BITTORRENT) || defined(ENABLE_METALINK)
+#if defined(ENABLE_METALINK)
     }
     else if (op->get(PREF_SHOW_FILES) == A2_V_TRUE) {
       showFiles(args, op);
@@ -295,7 +257,6 @@ Context::Context(bool standalone, int argc, char** argv, const KeyVals& options)
   op->remove(PREF_OUT);
   op->remove(PREF_FORCE_SEQUENTIAL);
   op->remove(PREF_INPUT_FILE);
-  op->remove(PREF_INDEX_OUT);
   op->remove(PREF_SELECT_FILE);
   op->remove(PREF_PAUSE);
   op->remove(PREF_CHECKSUM);

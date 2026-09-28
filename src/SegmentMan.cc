@@ -141,8 +141,8 @@ SegmentMan::checkoutSegment(cuid_t cuid, const std::shared_ptr<Piece>& piece)
                    static_cast<unsigned long>(piece->getIndex()), cuid));
 
   if (piece->getWrDiskCacheEntry()) {
-    // Flush cached data here, because the cached data may be overlapped
-    // if BT peers are involved.
+    // Flush cached data here, because the cached data may overlap with
+    // data written afterwards.
     A2_LOG_DEBUG(fmt(
         "Flushing cached data, size=%lu",
         static_cast<unsigned long>(piece->getWrDiskCacheEntry()->getSize())));
@@ -291,8 +291,8 @@ void SegmentMan::cancelSegmentInternal(cuid_t cuid,
   // TODO In PieceStorage::cancelPiece(), WrDiskCacheEntry may be
   // released. Flush first.
   if (piece->getWrDiskCacheEntry()) {
-    // Flush cached data here, because the cached data may be overlapped
-    // if BT peers are involved.
+    // Flush cached data here, because the cached data may overlap with
+    // data written afterwards.
     A2_LOG_DEBUG(fmt(
         "Flushing cached data, size=%lu",
         static_cast<unsigned long>(piece->getWrDiskCacheEntry()->getSize())));

@@ -45,7 +45,6 @@
 
 #include "error_code.h"
 #include "RequestGroup.h"
-#include "ContextAttribute.h"
 
 namespace aria2 {
 
@@ -74,8 +73,6 @@ struct DownloadResult {
 
   std::shared_ptr<MetadataInfo> metadataInfo;
 
-  std::vector<std::shared_ptr<ContextAttribute>> attrs;
-
   std::vector<std::shared_ptr<FileEntry>> fileEntries;
 
   // This field contains GIDs. See comment in
@@ -86,8 +83,6 @@ struct DownloadResult {
   a2_gid_t following;
 
   std::string bitfield;
-
-  std::string infoHash;
 
   std::string dir;
 

@@ -60,10 +60,6 @@ void FeatureConfigTest::testFeatureSummary()
       "Async DNS",
 #endif // ENABLE_ASYNC_DNS
 
-#ifdef ENABLE_BITTORRENT
-      "BitTorrent",
-#endif // ENABLE_BITTORRENT
-
 #ifdef HAVE_SQLITE3
       "Firefox3 Cookie",
 #endif // HAVE_SQLITE3

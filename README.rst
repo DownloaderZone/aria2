@@ -10,13 +10,12 @@ Introduction
 ------------
 
 aria2 is a utility for downloading files. The supported protocols are
-HTTP(S), FTP, SFTP, BitTorrent, and Metalink. aria2 can download a
+HTTP(S), FTP, SFTP, and Metalink. aria2 can download a
 file from multiple sources/protocols and tries to utilize your maximum
 download bandwidth. It supports downloading a file from
-HTTP(S)/FTP/SFTP and BitTorrent at the same time, while the data
-downloaded from HTTP(S)/FTP/SFTP is uploaded to the BitTorrent
-swarm. Using Metalink's chunk checksums, aria2 automatically validates
-chunks of data while downloading a file like BitTorrent.
+HTTP(S)/FTP/SFTP at the same time from multiple servers.  Using
+Metalink's chunk checksums, aria2 automatically validates chunks of
+data while downloading a file.
 
 The project page is located at https://aria2.github.io/.
 
@@ -32,10 +31,10 @@ Features
 Here is a list of features:
 
 * Command-line interface
-* Download files through HTTP(S)/FTP/SFTP/BitTorrent
+* Download files through HTTP(S)/FTP/SFTP
 * Segmented downloading
-* Metalink version 4 (RFC 5854) support(HTTP/FTP/SFTP/BitTorrent)
-* Metalink version 3.0 support(HTTP/FTP/SFTP/BitTorrent)
+* Metalink version 4 (RFC 5854) support(HTTP/FTP/SFTP)
+* Metalink version 3.0 support(HTTP/FTP/SFTP)
 * Metalink/HTTP (RFC 6249) support
 * HTTP/1.1 implementation
 * HTTP Proxy support
@@ -54,18 +53,10 @@ Here is a list of features:
 * Custom HTTP Header support
 * Persistent Connections support
 * FTP/SFTP through HTTP Proxy
-* Download/Upload speed throttling
-* BitTorrent extensions: Fast extension, DHT, PEX, MSE/PSE,
-  Multi-Tracker, UDP tracker
-* BitTorrent `WEB-Seeding <http://getright.com/seedtorrent.html>`_.
-  aria2 requests chunk more than piece size to reduce the request
-  overhead. It also supports pipelined requests with piece size.
-* BitTorrent Local Peer Discovery
-* Rename/change the directory structure of BitTorrent downloads
-  completely
+* Download speed throttling
 * JSON-RPC (over HTTP and WebSocket)/XML-RPC interface
 * Run as a daemon process
-* Selective download in multi-file torrent/Metalink
+* Selective download in multi-file Metalink
 * Chunk checksum validation in Metalink
 * Can disable segmented downloading in Metalink
 * Netrc support
@@ -114,8 +105,6 @@ features                  dependency
 ======================== ========================================
 HTTPS                    OSX or GnuTLS or OpenSSL or Windows
 SFTP                     libssh2
-BitTorrent               None. Optional: libnettle+libgmp or libgcrypt
-                         or OpenSSL (see note)
 Metalink                 libxml2 or Expat.
 Checksum                 None. Optional: OSX or libnettle or libgcrypt
                          or OpenSSL or Windows (see note)
@@ -175,9 +164,8 @@ libraries:
 * Apple TLS (OSX only)
 * Windows TLS (Windows only)
 
-You can disable BitTorrent and Metalink support by providing
-``--disable-bittorrent`` and ``--disable-metalink`` to the configure
-script respectively.
+You can disable Metalink support by providing ``--disable-metalink``
+to the configure script.
 
 To enable async DNS support, you need c-ares.
 
@@ -196,9 +184,8 @@ To build aria2 from the source package, you need the following
 development packages (package name may vary depending on the
 distribution you use):
 
-* libgnutls-dev    (Required for HTTPS, BitTorrent, Checksum support)
-* nettle-dev       (Required for BitTorrent, Checksum support)
-* libgmp-dev       (Required for BitTorrent)
+* libgnutls-dev    (Required for HTTPS, Checksum support)
+* nettle-dev       (Required for Checksum support)
 * libssh2-1-dev    (Required for SFTP support)
 * libc-ares-dev    (Required for async DNS support)
 * libxml2-dev      (Required for Metalink support)
@@ -206,15 +193,15 @@ distribution you use):
 * libsqlite3-dev   (Required for Firefox3/Chromium cookie support)
 * pkg-config       (Required to detect installed libraries)
 
-You can use libgcrypt-dev instead of nettle-dev and libgmp-dev:
+You can use libgcrypt-dev instead of nettle-dev:
 
-* libgpg-error-dev (Required for BitTorrent, Checksum support)
-* libgcrypt-dev    (Required for BitTorrent, Checksum support)
+* libgpg-error-dev (Required for Checksum support)
+* libgcrypt-dev    (Required for Checksum support)
 
 You can use libssl-dev instead of
-libgnutls-dev, nettle-dev, libgmp-dev, libgpg-error-dev and libgcrypt-dev:
+libgnutls-dev, nettle-dev, libgpg-error-dev and libgcrypt-dev:
 
-* libssl-dev       (Required for HTTPS, BitTorrent, Checksum support)
+* libssl-dev       (Required for HTTPS, Checksum support)
 
 You can use libexpat1-dev instead of libxml2-dev:
 
@@ -399,69 +386,10 @@ man page by ``make html``. The HTML version manual is also available
 translation <https://aria2.github.io/manual/ru/html/>`_, `Portuguese
 translation <https://aria2.github.io/manual/pt/html/>`_).
 
-BitTorrent
------------
-
-About file names
-~~~~~~~~~~~~~~~~
-The file name of the downloaded file is determined as follows:
-
-single-file mode
-    If "name" key is present in .torrent file, the file name is the value
-    of "name" key. Otherwise, the file name is the base name of .torrent
-    file appended by ".file". For example, .torrent file is
-    "test.torrent", then file name is "test.torrent.file".  The
-    directory to store the downloaded file can be specified by -d
-    option.
-
-multi-file mode
-    The complete directory/file structure mentioned in .torrent file
-    is created.  The directory to store the top directory of
-    downloaded files can be specified by -d option.
-
-Before download starts, a complete directory structure is created if
-needed. By default, aria2 opens at most 100 files mentioned in
-.torrent file, and directly writes to and reads from these files.
-The number of files to open simultaneously can be controlled by
-``--bt-max-open-files`` option.
-
-DHT
-~~~
-
-aria2 supports mainline compatible DHT. By default, the routing table
-for IPv4 DHT is saved to ``$XDG_CACHE_HOME/aria2/dht.dat`` and the
-routing table for IPv6 DHT is saved to
-``$XDG_CACHE_HOME/aria2/dht6.dat`` unless files exist at
-``$HOME/.aria2/dht.dat`` or ``$HOME/.aria2/dht6.dat``. aria2 uses the
-same port number to listen on for both IPv4 and IPv6 DHT.
-
-UDP tracker
-~~~~~~~~~~~
-
-UDP tracker support is enabled when IPv4 DHT is enabled.  The port
-number of the UDP tracker is shared with DHT. Use ``--dht-listen-port``
-option to change the port number.
-
-Other things should be noted
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* ``-o`` option is used to change the file name of .torrent file itself,
-  not a file name of a file in .torrent file. For this purpose, use
-  ``--index-out`` option instead.
-* The port numbers that aria2 uses by default are 6881-6999 for TCP
-  and UDP.
-* aria2 doesn't configure port-forwarding automatically. Please
-  configure your router or firewall manually.
-* The maximum number of peers is 55. This limit may be exceeded when
-  the download rate is low. This download rate can be adjusted using
-  ``--bt-request-peer-speed-limit`` option.
-* As of release 0.10.0, aria2 stops sending request messages after
-  selective download completes.
-
 Metalink
 --------
 
-The current implementation supports HTTP(S)/FTP/SFTP/BitTorrent.  The
+The current implementation supports HTTP(S)/FTP/SFTP.  The
 other P2P protocols are ignored. Both Metalink4 (RFC 5854) and
 Metalink version 3.0 documents are supported.
 
@@ -482,13 +410,10 @@ after the completion of the download.  The file name is download
 file name + ".sig". If the same file already exists, the signature file is
 not saved.
 
-In Metalink4, a multi-file torrent could appear in metalink:metaurl
-element.  Since aria2 cannot download 2 same torrents at the same
-time, aria2 groups files in metalink:file element which has the same
-BitTorrent metaurl, and downloads them from a single BitTorrent swarm.
-This is a basically multi-file torrent download with file selection, so
-the adjacent files which are not in Metalink document but share the same
-piece with the selected file are also created.
+In Metalink4, a metalink:metaurl element may point to a resource type
+that aria2 does not support, such as a BitTorrent download.  Those
+resources are ignored, and aria2 downloads the file using the other
+URLs found in the document.
 
 If relative URI is specified in metalink:url or metalink:metaurl
 element, aria2 uses the URI of Metalink file as base URI to resolve
@@ -548,18 +473,3 @@ References
 * `RFC 6266 Use of the Content-Disposition Header Field in the Hypertext Transfer Protocol (HTTP) <http://tools.ietf.org/html/rfc6266>`_
 * `RFC 6455 The WebSocket Protocol <http://tools.ietf.org/html/rfc6455>`_
 * `RFC 6555 Happy Eyeballs: Success with Dual-Stack Hosts <http://tools.ietf.org/html/rfc6555>`_
-
-* `The BitTorrent Protocol Specification <http://www.bittorrent.org/beps/bep_0003.html>`_
-* `BitTorrent: DHT Protocol <http://www.bittorrent.org/beps/bep_0005.html>`_
-* `BitTorrent: Fast Extension <http://www.bittorrent.org/beps/bep_0006.html>`_
-* `BitTorrent: IPv6 Tracker Extension <http://www.bittorrent.org/beps/bep_0007.html>`_
-* `BitTorrent: Extension for Peers to Send Metadata Files <http://www.bittorrent.org/beps/bep_0009.html>`_
-* `BitTorrent: Extension Protocol <http://www.bittorrent.org/beps/bep_0010.html>`_
-* `BitTorrent: Multitracker Metadata Extension <http://www.bittorrent.org/beps/bep_0012.html>`_
-* `BitTorrent: UDP Tracker Protocol for BitTorrent <http://www.bittorrent.org/beps/bep_0015.html>`_
-  and `BitTorrent udp-tracker protocol specification <http://www.rasterbar.com/products/libtorrent/udp_tracker_protocol.html>`_.
-* `BitTorrent: WebSeed - HTTP/FTP Seeding (GetRight style) <http://www.bittorrent.org/beps/bep_0019.html>`_
-* `BitTorrent: Private Torrents <http://www.bittorrent.org/beps/bep_0027.html>`_
-* `BitTorrent: BitTorrent DHT Extensions for IPv6 <http://www.bittorrent.org/beps/bep_0032.html>`_
-* `BitTorrent: Message Stream Encryption <http://wiki.vuze.com/w/Message_Stream_Encryption>`_
-* `Kademlia: A Peer-to-peer Information System Based on the  XOR Metric <https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf>`_

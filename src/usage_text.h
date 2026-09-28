@@ -116,8 +116,7 @@
   _(" --lowest-speed-limit=SPEED   Close connection if download speed is lower than\n" \
     "                              or equal to this value(bytes per sec).\n" \
     "                              0 means aria2 does not have a lowest speed limit.\n" \
-    "                              You can append K or M(1K = 1024, 1M = 1024K).\n" \
-    "                              This option does not affect BitTorrent downloads.")
+    "                              You can append K or M(1K = 1024, 1M = 1024K).")
 #define TEXT_MAX_OVERALL_DOWNLOAD_LIMIT                                 \
   _(" --max-overall-download-limit=SPEED Set max overall download speed in bytes/sec.\n" \
     "                              0 means unrestricted.\n"             \
@@ -195,7 +194,7 @@
 #define TEXT_CHECK_INTEGRITY                                            \
   _(" -V, --check-integrity[=true|false] Check file integrity by validating piece\n" \
     "                              hashes or a hash of entire file. This option has\n" \
-    "                              effect only in BitTorrent, Metalink downloads\n" \
+    "                              effect only in Metalink downloads\n" \
     "                              with checksums or HTTP(S)/FTP downloads with\n" \
     "                              --checksum option. If piece hashes are provided,\n" \
     "                              this option can detect damaged portions of a file\n" \
@@ -206,14 +205,6 @@
     "                              re-downloaded from scratch. If both piece hashes\n" \
     "                              and a hash of entire file are provided, only\n" \
     "                              piece hashes are used.")
-#define TEXT_BT_HASH_CHECK_SEED                                         \
-  _(" --bt-hash-check-seed[=true|false] If true is given, after hash check using\n" \
-    "                              --check-integrity option and file is complete,\n" \
-    "                              continue to seed file. If you want to check file\n" \
-    "                              and download it only when it is damaged or\n" \
-    "                              incomplete, set this option to false.\n" \
-    "                              This option has effect only on BitTorrent\n" \
-    "                              download.")
 #define TEXT_REALTIME_CHUNK_CHECKSUM                                    \
   _(" --realtime-chunk-checksum[=true|false]  Validate chunk of data by calculating\n" \
     "                              checksum while downloading a file if chunk\n" \
@@ -243,7 +234,7 @@
     "                              for details. See also --deferred-input option.")
 #define TEXT_MAX_CONCURRENT_DOWNLOADS                                   \
   _(" -j, --max-concurrent-downloads=N Set maximum number of parallel downloads for\n" \
-    "                              every static (HTTP/FTP) URL, torrent and metalink.\n" \
+    "                              every static (HTTP/FTP) URL and metalink.\n" \
     "                              See also --split and --optimize-concurrent-downloads options.")
 #define TEXT_OPTIMIZE_CONCURRENT_DOWNLOADS\
   _(" --optimize-concurrent-downloads[=true|false|A:B] Optimizes the number of\n" \
@@ -269,10 +260,8 @@
     "                              overwritten. Session Cookies are also saved and\n" \
     "                              their expiry values are treated as 0.")
 #define TEXT_SHOW_FILES                                                 \
-  _(" -S, --show-files[=true|false] Print file listing of .torrent, .meta4 and\n" \
-    "                              .metalink file and exit. More detailed\n" \
-    "                              information will be listed in case of torrent\n" \
-    "                              file.")
+  _(" -S, --show-files[=true|false] Print file listing of .meta4 and\n" \
+    "                              .metalink file and exit.")
 #define TEXT_SELECT_FILE                                                \
   _(" --select-file=INDEX...       Set file to download by specifying its index.\n" \
     "                              You can find the file index using the\n" \
@@ -282,104 +271,6 @@
     "                              ',' and '-' can be used together.\n" \
     "                              When used with the -M option, index may vary\n" \
     "                              depending on the query(see --metalink-* options).")
-#define TEXT_TORRENT_FILE                                               \
-  _(" -T, --torrent-file=TORRENT_FILE  The path to the .torrent file.")
-#define TEXT_FOLLOW_TORRENT                                             \
-  _(" --follow-torrent=true|false|mem If true or mem is specified, when a file\n" \
-    "                              whose suffix is .torrent or content type is\n" \
-    "                              application/x-bittorrent is downloaded, aria2\n" \
-    "                              parses it as a torrent file and downloads files\n" \
-    "                              mentioned in it.\n"                  \
-    "                              If mem is specified, a torrent file is not\n" \
-    "                              written to the disk, but is just kept in memory.\n" \
-    "                              If false is specified, the .torrent file is\n" \
-    "                              downloaded to the disk, but is not parsed as a\n" \
-    "                              torrent and its contents are not downloaded.")
-#define TEXT_LISTEN_PORT                                                \
-  _(" --listen-port=PORT...        Set TCP port number for BitTorrent downloads.\n" \
-    "                              Multiple ports can be specified by using ',',\n" \
-    "                              for example: \"6881,6885\". You can also use '-'\n" \
-    "                              to specify a range: \"6881-6999\". ',' and '-' can\n" \
-    "                              be used together.")
-#define TEXT_MAX_OVERALL_UPLOAD_LIMIT                                   \
-  _(" --max-overall-upload-limit=SPEED Set max overall upload speed in bytes/sec.\n" \
-    "                              0 means unrestricted.\n"             \
-    "                              You can append K or M(1K = 1024, 1M = 1024K).\n" \
-    "                              To limit the upload speed per torrent, use\n" \
-    "                              --max-upload-limit option.")
-#define TEXT_MAX_UPLOAD_LIMIT                                           \
-  _(" -u, --max-upload-limit=SPEED Set max upload speed per each torrent in\n" \
-    "                              bytes/sec. 0 means unrestricted.\n"  \
-    "                              You can append K or M(1K = 1024, 1M = 1024K).\n" \
-    "                              To limit the overall upload speed, use\n" \
-    "                              --max-overall-upload-limit option.")
-#define TEXT_SEED_TIME                                                  \
-  _(" --seed-time=MINUTES          Specify seeding time in (fractional) minutes.\n" \
-    "                              Also see the --seed-ratio option.")
-#define TEXT_SEED_RATIO                                                 \
-  _(" --seed-ratio=RATIO           Specify share ratio. Seed completed torrents\n" \
-    "                              until share ratio reaches RATIO.\n"  \
-    "                              You are strongly encouraged to specify equals or\n" \
-    "                              more than 1.0 here. Specify 0.0 if you intend to\n" \
-    "                              do seeding regardless of share ratio.\n" \
-    "                              If --seed-time option is specified along with\n" \
-    "                              this option, seeding ends when at least one of\n" \
-    "                              the conditions is satisfied.")
-#define TEXT_PEER_ID_PREFIX                                             \
-  _(" --peer-id-prefix=PEER_ID_PREFIX Specify the prefix of peer ID. The peer ID in\n" \
-    "                              BitTorrent is 20 byte length. If more than 20\n" \
-    "                              bytes are specified, only first 20 bytes are\n" \
-    "                              used. If less than 20 bytes are specified, random\n" \
-    "                              byte data are added to make its length 20 bytes.")
-#define TEXT_PEER_AGENT                                                 \
-  _(" --peer-agent=PEER_AGENT  Set client reported during Extended torrent handshakes")
-#define TEXT_ENABLE_PEER_EXCHANGE                                       \
-  _(" --enable-peer-exchange[=true|false] Enable Peer Exchange extension.")
-#define TEXT_ENABLE_DHT                                         \
-  _(" --enable-dht[=true|false]    Enable IPv4 DHT functionality. It also enables\n" \
-    "                              UDP tracker support. If a private flag is set\n" \
-    "                              in a torrent, aria2 doesn't use DHT for that\n" \
-    "                              download even if ``true`` is given.")
-#define TEXT_DHT_LISTEN_PORT                                            \
-  _(" --dht-listen-port=PORT...    Set UDP listening port used by DHT(IPv4, IPv6)\n"   \
-    "                              and UDP tracker. Multiple ports can be specified\n" \
-    "                              by using ',', for example: \"6881,6885\". You can\n" \
-    "                              also use '-' to specify a range: \"6881-6999\".\n" \
-    "                              ',' and '-' can be used together.")
-#define TEXT_DHT_ENTRY_POINT                                            \
-  _(" --dht-entry-point=HOST:PORT  Set host and port as an entry point to IPv4 DHT\n" \
-    "                              network.")
-#define TEXT_DHT_FILE_PATH                                              \
-  _(" --dht-file-path=PATH         Change the IPv4 DHT routing table file to PATH.")
-#define TEXT_BT_MIN_CRYPTO_LEVEL                                        \
-  _(" --bt-min-crypto-level=plain|arc4 Set minimum level of encryption method.\n" \
-    "                              If several encryption methods are provided by a\n" \
-    "                              peer, aria2 chooses the lowest one which satisfies\n" \
-    "                              the given level.")
-#define TEXT_BT_REQUIRE_CRYPTO                                          \
-  _(" --bt-require-crypto[=true|false] If true is given, aria2 doesn't accept and\n" \
-    "                              establish connection with legacy BitTorrent\n" \
-    "                              handshake. Thus aria2 always uses Obfuscation\n" \
-    "                              handshake.")
-#define TEXT_BT_REQUEST_PEER_SPEED_LIMIT                                \
-  _(" --bt-request-peer-speed-limit=SPEED If the whole download speed of every\n" \
-    "                              torrent is lower than SPEED, aria2 temporarily\n" \
-    "                              increases the number of peers to try for more\n" \
-    "                              download speed. Configuring this option with your\n" \
-    "                              preferred download speed can increase your\n" \
-    "                              download speed in some cases.\n"     \
-    "                              You can append K or M(1K = 1024, 1M = 1024K).")
-#define TEXT_BT_MAX_OPEN_FILES                                          \
-  _(" --bt-max-open-files=NUM      Specify maximum number of files to open in\n" \
-    "                              multi-file BitTorrent/Metalink downloads\n" \
-    "                              globally.")
-#define TEXT_BT_SEED_UNVERIFIED                                         \
-  _(" --bt-seed-unverified[=true|false] Seed previously downloaded files without\n" \
-    "                              verifying piece hashes.")
-#define TEXT_BT_MAX_PEERS                                               \
-  _(" --bt-max-peers=NUM           Specify the maximum number of peers per torrent.\n" \
-    "                              0 means unlimited.\n"                \
-    "                              See also --bt-request-peer-speed-limit option.")
 #define TEXT_METALINK_FILE                                              \
   _(" -M, --metalink-file=METALINK_FILE The file path to the .meta4 and .metalink\n" \
     "                              file. Reads input from stdin when '-' is\n" \
@@ -549,15 +440,6 @@
     "                              but not the extended version filename*.")
 #define TEXT_EVENT_POLL                                                 \
   _(" --event-poll=POLL            Specify the method for polling events.")
-#define TEXT_BT_EXTERNAL_IP                                             \
-  _(" --bt-external-ip=IPADDRESS   Specify the external IP address to use in\n" \
-    "                              BitTorrent download and DHT. It may be sent to\n" \
-    "                              BitTorrent tracker. For DHT, this option should\n" \
-    "                              be set to report that local node is downloading\n" \
-    "                              a particular torrent. This is critical to use\n" \
-    "                              DHT in a private network. Although this function\n" \
-    "                              is named 'external', it can accept any kind of IP\n" \
-    "                              addresses.")
 #define TEXT_HTTP_AUTH_CHALLENGE                                        \
   _(" --http-auth-challenge[=true|false] Send HTTP authorization header only when it\n" \
     "                              is requested by the server. If false is set, then\n" \
@@ -566,26 +448,10 @@
     "                              are embedded in URI, authorization header is\n" \
     "                              always sent to the server regardless of this\n" \
     "                              option.")
-#define TEXT_INDEX_OUT                                                  \
-  _(" -O, --index-out=INDEX=PATH   Set file path for file with index=INDEX. You can\n" \
-    "                              find the file index using the --show-files option.\n" \
-    "                              PATH is a relative path to the path specified in\n" \
-    "                              --dir option. You can use this option multiple\n" \
-    "                              times.")
 #define TEXT_DRY_RUN                                                    \
   _(" --dry-run[=true|false]       If true is given, aria2 just checks whether the\n" \
     "                              remote file is available and doesn't download\n" \
-    "                              data. This option has effect on HTTP/FTP download.\n" \
-    "                              BitTorrent downloads are canceled if true is\n" \
-    "                              specified.")
-#define TEXT_BT_TRACKER_INTERVAL                                        \
-  _(" --bt-tracker-interval=SEC    Set the interval in seconds between tracker\n" \
-    "                              requests. This completely overrides interval value\n" \
-    "                              and aria2 just uses this value and ignores the\n" \
-    "                              min interval and interval value in the response of\n" \
-    "                              tracker. If 0 is set, aria2 determines interval\n" \
-    "                              based on the response of tracker and the download\n" \
-    "                              progress.")
+    "                              data. This option has effect on HTTP/FTP download.")
 #define TEXT_ON_DOWNLOAD_COMPLETE                                       \
   _(" --on-download-complete=COMMAND Set the command to be executed after download\n" \
     "                              completed.\n"                        \
@@ -617,22 +483,6 @@
     "                              option is not executed.\n"           \
     "                              See --on-download-start option for the\n" \
     "                              requirement of COMMAND.")
-#define TEXT_BT_STOP_TIMEOUT                                            \
-  _(" --bt-stop-timeout=SEC        Stop BitTorrent download if download speed is 0 in\n" \
-    "                              consecutive SEC seconds. If 0 is given, this\n" \
-    "                              feature is disabled.")
-#define TEXT_BT_PRIORITIZE_PIECE                                        \
-  _(" --bt-prioritize-piece=head[=SIZE],tail[=SIZE] Try to download first and last\n" \
-    "                              pieces of each file first. This is useful for\n" \
-    "                              previewing files. The argument can contain 2\n" \
-    "                              keywords:head and tail. To include both keywords,\n" \
-    "                              they must be separated by comma. These keywords\n" \
-    "                              can take one parameter, SIZE. For example, if\n" \
-    "                              head=SIZE is specified, pieces in the range of\n" \
-    "                              first SIZE bytes of each file get higher priority.\n" \
-    "                              tail=SIZE means the range of last SIZE bytes of\n" \
-    "                              each file. SIZE can include K or M(1K = 1024, 1M =\n" \
-    "                              1024K). If SIZE is omitted, SIZE=1M is used.")
 #define TEXT_INTERFACE                                                  \
   _(" --interface=INTERFACE        Bind sockets to given interface. You can specify\n" \
     "                              interface name, IP address and hostname.")
@@ -645,35 +495,15 @@
     "                              ignored.")
 #define TEXT_DISABLE_IPV6                               \
   _(" --disable-ipv6[=true|false]  Disable IPv6.")
-#define TEXT_BT_SAVE_METADATA                                           \
-  _(" --bt-save-metadata[=true|false] Save metadata as .torrent file. This option has\n" \
-    "                              effect only when BitTorrent Magnet URI is used.\n" \
-    "                              The filename is hex encoded info hash with suffix\n" \
-    "                              .torrent. The directory to be saved is the same\n" \
-    "                              directory where download file is saved. If the\n" \
-    "                              same file already exists, metadata is not saved.\n" \
-    "                              See also --bt-metadata-only option.")
 #define TEXT_HTTP_NO_CACHE                      \
   _(" --http-no-cache[=true|false] Send Cache-Control: no-cache and Pragma: no-cache\n" \
     "                              header to avoid cached content.  If false is\n" \
     "                              given, these headers are not sent and you can add\n" \
     "                              Cache-Control header with a directive you like\n" \
     "                              using --header option.")
-#define TEXT_BT_METADATA_ONLY                   \
-  _(" --bt-metadata-only[=true|false] Download metadata only. The file(s) described\n" \
-    "                              in metadata will not be downloaded. This option\n" \
-    "                              has effect only when BitTorrent Magnet URI is\n" \
-    "                              used. See also --bt-save-metadata option.")
 #define TEXT_HUMAN_READABLE                     \
   _(" --human-readable[=true|false] Print sizes and speed in human readable format\n" \
     "                              (e.g., 1.2Ki, 3.4Mi) in the console readout.")
-#define TEXT_BT_ENABLE_LPD                      \
-  _(" --bt-enable-lpd[=true|false] Enable Local Peer Discovery.")
-#define TEXT_BT_LPD_INTERFACE                                           \
-  _(" --bt-lpd-interface=INTERFACE Use given interface for Local Peer Discovery. If\n" \
-    "                              this option is not specified, the default\n" \
-    "                              interface is chosen. You can specify interface\n" \
-    "                              name and IP address.")
 #define TEXT_REUSE_URI                          \
   _(" --reuse-uri[=true|false]     Reuse already used URIs if no unused URIs are\n" \
     "                              left.")
@@ -715,16 +545,6 @@
     "                              is 0, aria2 downloads file from scratch when all\n" \
     "                              given URIs do not support resume.\n" \
     "                              See --always-resume option.")
-#define TEXT_BT_TRACKER_TIMEOUT                                 \
-  _(" --bt-tracker-timeout=SEC     Set timeout in seconds.")
-#define TEXT_BT_TRACKER_CONNECT_TIMEOUT                                 \
-  _(" --bt-tracker-connect-timeout=SEC Set the connect timeout in seconds to\n" \
-    "                              establish connection to tracker. After the\n" \
-    "                              connection is established, this option makes no\n" \
-    "                              effect and --bt-tracker-timeout option is used\n" \
-    "                              instead.")
-#define TEXT_DHT_MESSAGE_TIMEOUT                \
-  _(" --dht-message-timeout=SEC    Set timeout in seconds.")
 #define TEXT_HTTP_ACCEPT_GZIP                   \
   _(" --http-accept-gzip[=true|false] Send 'Accept-Encoding: deflate, gzip' request\n" \
     "                              header and inflate response if remote server\n" \
@@ -734,9 +554,9 @@
   _(" --save-session=FILE          Save error/unfinished downloads to FILE on exit.\n" \
     "                              You can pass this output file to aria2c with -i\n" \
     "                              option on restart. Please note that downloads\n" \
-    "                              added by aria2.addTorrent and aria2.addMetalink\n" \
-    "                              RPC method and whose metadata could not be saved\n" \
-    "                              as a file will not be saved. Downloads removed\n" \
+    "                              added by aria2.addMetalink RPC method and whose\n" \
+    "                              metadata could not be saved as a file will not\n" \
+    "                              be saved. Downloads removed\n" \
     "                              using aria2.remove and aria2.forceRemove will not\n" \
     "                              be saved.")
 #define TEXT_MAX_CONNECTION_PER_SERVER          \
@@ -755,45 +575,10 @@
   _(" --conditional-get[=true|false] Download file only when the local file is older\n" \
     "                              than remote file. Currently, this function has\n" \
     "                              many limitations. See man page for details.")
-#define TEXT_ON_BT_DOWNLOAD_COMPLETE            \
-  _(" --on-bt-download-complete=COMMAND For BitTorrent, a command specified in\n" \
-    "                              --on-download-complete is called after download\n" \
-    "                              completed and seeding is over. On the other hand,\n" \
-    "                              this option sets the command to be executed after\n" \
-    "                              download completed but before seeding.\n" \
-    "                              See --on-download-start option for the\n" \
-    "                              requirement of COMMAND.")
 #define TEXT_ENABLE_ASYNC_DNS6                  \
   _(" --enable-async-dns6[=true|false] Enable IPv6 name resolution in asynchronous\n" \
     "                              DNS resolver. This option will be ignored when\n" \
     "                              --async-dns=false.")
-#define TEXT_ENABLE_DHT6                        \
-  _(" --enable-dht6[=true|false]   Enable IPv6 DHT functionality.\n" \
-    "                              Use --dht-listen-port option to specify port\n" \
-    "                              number to listen on. See also --dht-listen-addr6\n" \
-    "                              option.")
-#define TEXT_DHT_LISTEN_ADDR6                   \
-  _(" --dht-listen-addr6=ADDR      Specify address to bind socket for IPv6 DHT. \n" \
-    "                              It should be a global unicast IPv6 address of the\n" \
-    "                              host.")
-#define TEXT_DHT_ENTRY_POINT6                   \
-  _(" --dht-entry-point6=HOST:PORT Set host and port as an entry point to IPv6 DHT\n" \
-    "                              network.")
-#define TEXT_DHT_FILE_PATH6                     \
-  _(" --dht-file-path6=PATH        Change the IPv6 DHT routing table file to PATH.")
-#define TEXT_BT_TRACKER                                                 \
-  _(" --bt-tracker=URI[,...]       Comma separated list of additional BitTorrent\n" \
-    "                              tracker's announce URI. These URIs are not\n" \
-    "                              affected by --bt-exclude-tracker option because\n" \
-    "                              they are added after URIs in --bt-exclude-tracker\n" \
-    "                              option are removed.")
-#define TEXT_BT_EXCLUDE_TRACKER                                         \
-  _(" --bt-exclude-tracker=URI[,...] Comma separated list of BitTorrent tracker's\n" \
-    "                              announce URI to remove. You can use special value\n" \
-    "                              '*' which matches all URIs, thus removes all\n" \
-    "                              announce URIs. When specifying '*' in shell\n" \
-    "                              command-line, don't forget to escape or quote it.\n" \
-    "                              See also --bt-tracker option.")
 #define TEXT_MAX_DOWNLOAD_RESULT                \
   _(" --max-download-result=NUM    Set maximum number of download result kept in\n" \
     "                              memory. The download results are completed/error/\n" \
@@ -920,8 +705,7 @@
   _(" --piece-length=LENGTH        Set a piece length for HTTP/FTP downloads. This\n" \
     "                              is the boundary when aria2 splits a file. All\n" \
     "                              splits occur at multiple of this length. This\n" \
-    "                              option will be ignored in BitTorrent downloads.\n" \
-    "                              It will be also ignored if Metalink file\n" \
+    "                              option will be also ignored if Metalink file\n" \
     "                              contains piece hashes.")
 #define TEXT_STOP_WITH_PROCESS                                          \
   _(" --stop-with-process=PID      Stop application when process PID is not running.\n" \
@@ -938,14 +722,6 @@
     "                              file contains a lot of URIs to download.\n" \
     "                              If false is given, aria2 reads all URIs and\n" \
     "                              options at startup.")
-#define TEXT_BT_REMOVE_UNSELECTED_FILE                                  \
-  _(" --bt-remove-unselected-file[=true|false] Removes the unselected files when\n" \
-    "                              download is completed in BitTorrent. To\n" \
-    "                              select files, use --select-file option. If\n" \
-    "                              it is not used, all files are assumed to be\n" \
-    "                              selected. Please use this option with care\n" \
-    "                              because it will actually remove files from\n" \
-    "                              your disk.")
 #define TEXT_ENABLE_MMAP                        \
   _(" --enable-mmap[=true|false]   Map files into memory.")
 #define TEXT_RPC_CERTIFICATE                                            \
@@ -967,23 +743,19 @@
     "                              --rpc-private-key options to specify the\n" \
     "                              server certificate and private key.")
 #define TEXT_RPC_SAVE_UPLOAD_METADATA                                   \
-  _(" --rpc-save-upload-metadata[=true|false] Save the uploaded torrent or\n" \
-    "                              metalink metadata in the directory specified\n" \
+  _(" --rpc-save-upload-metadata[=true|false] Save the uploaded metalink\n" \
+    "                              metadata in the directory specified\n" \
     "                              by --dir option. The filename consists of\n" \
     "                              SHA-1 hash hex string of metadata plus\n" \
-    "                              extension. For torrent, the extension is\n" \
-    "                              '.torrent'. For metalink, it is '.meta4'.\n" \
+    "                              extension. For metalink, it is '.meta4'.\n" \
     "                              If false is given to this option, the\n" \
-    "                              downloads added by aria2.addTorrent or\n" \
-    "                              aria2.addMetalink will not be saved by\n" \
-    "                              --save-session option.")
+    "                              downloads added by aria2.addMetalink will not\n" \
+    "                              be saved by --save-session option.")
 #define TEXT_FORCE_SAVE                         \
   _(" --force-save[=true|false]    Save download with --save-session option even\n" \
     "                              if the download is completed or removed. This\n" \
     "                              option also saves control file in that\n" \
-    "                              situations. This may be useful to save\n" \
-    "                              BitTorrent seeding which is recognized as\n" \
-    "                              completed state.")
+    "                              situations.")
 #define TEXT_SAVE_NOT_FOUND                         \
   _(" --save-not-found[=true|false] Save download with --save-session option even\n" \
     "                              if the file was not found on the server. This\n" \
@@ -1026,8 +798,8 @@
 #define TEXT_RPC_SECRET                                                 \
   _(" --rpc-secret=TOKEN           Set RPC secret authorization token.")
 #define TEXT_DSCP                                                       \
-  _(" --dscp=DSCP                  Set DSCP value in outgoing IP packets of\n" \
-    "                              BitTorrent traffic for QoS. This parameter sets\n" \
+  _(" --dscp=DSCP                  Set DSCP value in outgoing IP packets for QoS.\n" \
+    "                              This parameter sets\n" \
     "                              only DSCP bits in TOS field of IP packets,\n" \
     "                              not the whole field. If you take values\n" \
     "                              from /usr/include/netinet/ip.h divide them by 4\n" \
@@ -1048,35 +820,14 @@
 #define TEXT_PAUSE_METADATA                  \
   _(" --pause-metadata[=true|false]\n"       \
     "                              Pause downloads created as a result of metadata\n" \
-    "                              download. There are 3 types of metadata\n" \
-    "                              downloads in aria2: (1) downloading .torrent\n" \
-    "                              file. (2) downloading torrent metadata using\n" \
-    "                              magnet link. (3) downloading metalink file.\n" \
+    "                              download. In aria2, downloading a metalink file\n" \
+    "                              is the only kind of metadata download.\n" \
     "                              These metadata downloads will generate downloads\n" \
     "                              using their metadata. This option pauses these\n" \
     "                              subsequent downloads. This option is effective\n" \
     "                              only when --enable-rpc=true is given.")
-#define TEXT_BT_DETACH_SEED_ONLY                \
-  _(" --bt-detach-seed-only[=true|false]\n"     \
-    "                              Exclude seed only downloads when counting\n" \
-    "                              concurrent active downloads (See -j option).\n" \
-    "                              This means that if -j3 is given and this option\n" \
-    "                              is turned on and 3 downloads are active and one\n" \
-    "                              of those enters seed mode, then it is excluded\n" \
-    "                              from active download count (thus it becomes 2),\n" \
-    "                              and the next download waiting in queue gets\n" \
-    "                              started. But be aware that seeding item is still\n" \
-    "                              recognized as active download in RPC method.")
 #define TEXT_MIN_TLS_VERSION                                            \
   _(" --min-tls-version=VERSION    Specify minimum SSL/TLS version to enable.")
-#define TEXT_BT_FORCE_ENCRYPTION                                        \
-  _(" --bt-force-encryption[=true|false]\n"                             \
-    "                              Requires BitTorrent message payload encryption\n" \
-    "                              with arc4. This is a shorthand of\n" \
-    "                              --bt-require-crypto --bt-min-crypto-level=arc4.\n" \
-    "                              If true is given, deny legacy BitTorrent\n" \
-    "                              handshake and only use Obfuscation handshake and\n" \
-    "                              always encrypt message payload.")
 #define TEXT_SSH_HOST_KEY_MD                                            \
   _(" --ssh-host-key-md=TYPE=DIGEST\n"                                  \
     "                              Set checksum for SSH host public key. TYPE is\n" \
@@ -1093,13 +844,6 @@
     "                              Specifying 0 will disable this option. This value\n" \
     "                              will be set to socket file descriptor using\n" \
     "                              SO_RCVBUF socket option with setsockopt() call.")
-#define TEXT_BT_ENABLE_HOOK_AFTER_HASH_CHECK                            \
-  _(" --bt-enable-hook-after-hash-check[=true|false] Allow hook command invocation\n" \
-    "                              after hash check (see -V option) in BitTorrent\n" \
-    "                              download. By default, when hash check succeeds,\n" \
-    "                              the command given by --on-bt-download-complete\n" \
-    "                              is executed. To disable this action, give false\n" \
-    "                              to this option.")
 #define TEXT_MAX_MMAP_LIMIT                                             \
   _(" --max-mmap-limit=SIZE        Set the maximum file size to enable mmap (see\n" \
     "                              --enable-mmap option). The file size is\n" \
@@ -1121,13 +865,5 @@
     "                              keep in mind that there is no upper bound to the\n" \
     "                              number of unfinished download result to keep. If\n" \
     "                              that is undesirable, turn this option off.")
-
-#define TEXT_BT_LOAD_SAVED_METADATA \
-  _(" --bt-load-saved-metadata[=true|false]\n" \
-    "                              Before getting torrent metadata from DHT when\n" \
-    "                              downloading with magnet link, first try to read\n" \
-    "                              file saved by --bt-save-metadata option. If it is\n" \
-    "                              successful, then skip downloading metadata from\n" \
-    "                              DHT.")
 
 // clang-format on

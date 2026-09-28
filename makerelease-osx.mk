@@ -7,7 +7,7 @@
 #  - Build static libraries of aria2 dependencies.
 #  - Create a statically linked, aria2 release.
 #    - The build will have all major features enabled, and will use
-#      AppleTLS and GMP.
+#      AppleTLS.
 #  - Create a corresponding .tar.bz containing the binaries:
 #  - Create a corresponding .pkg installer.
 #  - Create a corresponding .dmg image containing said installer.
@@ -18,7 +18,6 @@
 #  - zlib (compression, in particular web compression)
 #  - c-ares (asynchronous DNS resolver)
 #  - expat (XML parser, for metalinks)
-#  - gmp (multi-precision arithmetric library, for DHKeyExchange, BitTorrent)
 #  - sqlite3 (self-contained SQL database, for Firefox3 cookie reading)
 #  - cppunit (unit tests for C++, framework in use by aria2 `make check`)
 #
@@ -124,13 +123,6 @@ sqlite_url = https://sqlite.org/2019/sqlite-$(sqlite_version).tar.gz
 sqlite_cflags=$(CFLAGS) $(LTO_FLAGS)
 sqlite_ldflags=$(CFLAGS) $(LTO_FLAGS)
 
-gmp_version = 6.1.2
-gmp_hash = 5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2
-gmp_url = https://ftp.gnu.org/gnu/gmp/gmp-$(gmp_version).tar.bz2
-gmp_confflags = --disable-cxx --enable-assembly --with-pic --enable-fat
-gmp_cflags=$(CFLAGS)
-gmp_cxxflags=$(CXXFLAGS)
-
 libgpgerror_version = 1.36
 libgpgerror_hash = babd98437208c163175c29453f8681094bcaf92968a15cafb1a276076b33c97c
 libgpgerror_url = https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-$(libgpgerror_version).tar.bz2
@@ -162,7 +154,7 @@ cppunit_cxxflags=$(CXXFLAGS) $(LTO_FLAGS)
 
 
 # ARCHLIBS that can be template build
-ARCHLIBS = expat cares sqlite gmp libgpgerror libgcrypt libssh2 cppunit
+ARCHLIBS = expat cares sqlite libgpgerror libgcrypt libssh2 cppunit
 # NONARCHLIBS that cannot be template build
 NONARCHLIBS = zlib
 
@@ -180,10 +172,8 @@ ARIA2_CONFFLAGS = \
         --enable-static \
         --disable-shared \
         --enable-metalink \
-        --enable-bittorrent \
         --disable-nls \
         --with-appletls \
-        --with-libgmp \
         --with-sqlite3 \
         --with-libz \
         --with-libexpat \
@@ -349,7 +339,7 @@ endef
 $(foreach lib,$(ARCHLIBS),$(eval $(call ARCH_template,$(lib))))
 
 .PRECIOUS: aria2.%.build
-aria2.%.build: zlib.%.build expat.%.build gmp.%.build cares.%.build sqlite.%.build libgpgerror.%.build libgcrypt.%.build libssh2.%.build cppunit.%.build
+aria2.%.build: zlib.%.build expat.%.build cares.%.build sqlite.%.build libgpgerror.%.build libgcrypt.%.build libssh2.%.build cppunit.%.build
 	$(eval DEST := $$(basename $$@))
 	$(eval ARCH := $$(subst .,,$$(suffix $$(DEST))))
 	mkdir -p $(DEST)

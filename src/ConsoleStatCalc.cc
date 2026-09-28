@@ -65,12 +65,6 @@
 #include "ColorizedStream.h"
 #include "Option.h"
 
-#ifdef ENABLE_BITTORRENT
-#  include "bittorrent_helper.h"
-#  include "PeerStorage.h"
-#  include "BtRegistry.h"
-#endif // ENABLE_BITTORRENT
-
 namespace aria2 {
 
 std::string SizeFormatter::operator()(int64_t size) const
@@ -104,22 +98,6 @@ void printSizeProgress(ColorizedStream& o,
                        const TransferStat& stat,
                        const SizeFormatter& sizeFormatter)
 {
-#ifdef ENABLE_BITTORRENT
-  if (rg->isSeeder()) {
-    o << "SEED(";
-    if (rg->getCompletedLength() > 0) {
-      std::streamsize oldprec = o.precision();
-      o << std::fixed << std::setprecision(1)
-        << ((stat.allTimeUploadLength * 10) / rg->getCompletedLength()) / 10.0
-        << std::setprecision(oldprec) << std::resetiosflags(std::ios::fixed);
-    }
-    else {
-      o << "--";
-    }
-    o << ")";
-  }
-  else
-#endif // ENABLE_BITTORRENT
   {
     o << sizeFormatter(rg->getCompletedLength()) << "B/"
       << sizeFormatter(rg->getTotalLength()) << "B";
@@ -180,13 +158,6 @@ void printProgress(ColorizedStream& o, const std::shared_ptr<RequestGroup>& rg,
     << GroupId::toAbbrevHex(rg->getGID()) << " ";
   printSizeProgress(o, rg, stat, sizeFormatter);
   o << " CN:" << rg->getNumConnection();
-#ifdef ENABLE_BITTORRENT
-  auto btObj = e->getBtRegistry()->get(rg->getGID());
-  if (btObj) {
-    const PeerSet& peers = btObj->peerStorage->getUsedPeers();
-    o << " SD:" << countSeeder(peers.begin(), peers.end());
-  }
-#endif // ENABLE_BITTORRENT
 
   if (!rg->downloadFinished()) {
     o << " DL:" << colors::green << sizeFormatter(stat.downloadSpeed) << "B"

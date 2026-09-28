@@ -62,9 +62,6 @@
 #include "SingletonHolder.h"
 #include "Notifier.h"
 #include "ApiCallbackDownloadEventListener.h"
-#ifdef ENABLE_BITTORRENT
-#  include "bittorrent_helper.h"
-#endif // ENABLE_BITTORRENT
 
 namespace aria2 {
 
@@ -326,44 +323,6 @@ int addMetalink(Session* session, std::vector<A2Gid>* gids,
 #else  // !ENABLE_METALINK
   return -1;
 #endif // !ENABLE_METALINK
-}
-
-int addTorrent(Session* session, A2Gid* gid, const std::string& torrentFile,
-               const std::vector<std::string>& webSeedUris,
-               const KeyVals& options, int position)
-{
-#ifdef ENABLE_BITTORRENT
-  auto& e = session->context->reqinfo->getDownloadEngine();
-  auto requestOption = std::make_shared<Option>(*e->getOption());
-  std::vector<std::shared_ptr<RequestGroup>> result;
-  try {
-    apiGatherRequestOption(requestOption.get(), options,
-                           OptionParser::getInstance());
-    requestOption->put(PREF_TORRENT_FILE, torrentFile);
-    createRequestGroupForBitTorrent(result, requestOption, webSeedUris,
-                                    torrentFile);
-  }
-  catch (RecoverableException& e) {
-    A2_LOG_INFO_EX(EX_EXCEPTION_CAUGHT, e);
-    return -1;
-  }
-  if (!result.empty()) {
-    addRequestGroup(result.front(), e.get(), position);
-    if (gid) {
-      *gid = result.front()->getGID();
-    }
-  }
-  return 0;
-#else  // !ENABLE_BITTORRENT
-  return -1;
-#endif // !ENABLE_BITTORRENT
-}
-
-int addTorrent(Session* session, A2Gid* gid, const std::string& torrentFile,
-               const KeyVals& options, int position)
-{
-  return addTorrent(session, gid, torrentFile, std::vector<std::string>(),
-                    options, position);
 }
 
 int removeDownload(Session* session, A2Gid gid, bool force)
@@ -700,15 +659,6 @@ struct RequestGroupDH : public DownloadHandle {
   }
   virtual int getDownloadSpeed() CXX11_OVERRIDE { return ts.downloadSpeed; }
   virtual int getUploadSpeed() CXX11_OVERRIDE { return ts.uploadSpeed; }
-  virtual const std::string& getInfoHash() CXX11_OVERRIDE
-  {
-#ifdef ENABLE_BITTORRENT
-    if (group->getDownloadContext()->hasAttribute(CTX_ATTR_BT)) {
-      return bittorrent::getTorrentAttrs(group->getDownloadContext())->infoHash;
-    }
-#endif // ENABLE_BITTORRENT
-    return A2STR::NIL;
-  }
   virtual size_t getPieceLength() CXX11_OVERRIDE
   {
     const std::shared_ptr<DownloadContext>& dctx = group->getDownloadContext();
@@ -760,29 +710,6 @@ struct RequestGroupDH : public DownloadHandle {
     }
     return createFileData(dctx->getFileEntries()[index - 1], index, &bf);
   }
-  virtual BtMetaInfoData getBtMetaInfo() CXX11_OVERRIDE
-  {
-    BtMetaInfoData res;
-#ifdef ENABLE_BITTORRENT
-    if (group->getDownloadContext()->hasAttribute(CTX_ATTR_BT)) {
-      auto torrentAttrs =
-          bittorrent::getTorrentAttrs(group->getDownloadContext());
-      res.announceList = torrentAttrs->announceList;
-      res.comment = torrentAttrs->comment;
-      res.creationDate = torrentAttrs->creationDate;
-      res.mode = torrentAttrs->mode;
-      if (!torrentAttrs->metadata.empty()) {
-        res.name = torrentAttrs->name;
-      }
-    }
-    else
-#endif // ENABLE_BITTORRENT
-    {
-      res.creationDate = 0;
-      res.mode = BT_FILE_MODE_NONE;
-    }
-    return res;
-  }
   virtual const std::string& getOption(const std::string& name) CXX11_OVERRIDE
   {
     return getRequestOption(group->getOption(), name);
@@ -820,10 +747,6 @@ struct DownloadResultDH : public DownloadHandle {
   virtual std::string getBitfield() CXX11_OVERRIDE { return dr->bitfield; }
   virtual int getDownloadSpeed() CXX11_OVERRIDE { return 0; }
   virtual int getUploadSpeed() CXX11_OVERRIDE { return 0; }
-  virtual const std::string& getInfoHash() CXX11_OVERRIDE
-  {
-    return dr->infoHash;
-  }
   virtual size_t getPieceLength() CXX11_OVERRIDE { return dr->pieceLength; }
   virtual int getNumPieces() CXX11_OVERRIDE { return dr->numPieces; }
   virtual int getConnections() CXX11_OVERRIDE { return 0; }
@@ -850,10 +773,6 @@ struct DownloadResultDH : public DownloadHandle {
     bf.setBitfield(reinterpret_cast<const unsigned char*>(dr->bitfield.data()),
                    dr->bitfield.size());
     return createFileData(dr->fileEntries[index - 1], index, &bf);
-  }
-  virtual BtMetaInfoData getBtMetaInfo() CXX11_OVERRIDE
-  {
-    return BtMetaInfoData();
   }
   virtual const std::string& getOption(const std::string& name) CXX11_OVERRIDE
   {

@@ -46,7 +46,6 @@
 #include "A2STR.h"
 #include "ValueBase.h"
 #include "SegList.h"
-#include "ContextAttribute.h"
 #include "NetStat.h"
 
 namespace aria2 {
@@ -60,8 +59,6 @@ private:
   std::unique_ptr<Signature> signature_;
 
   RequestGroup* ownerRequestGroup_;
-
-  std::vector<std::shared_ptr<ContextAttribute>> attrs_;
 
   std::vector<std::shared_ptr<FileEntry>> fileEntries_;
 
@@ -195,16 +192,6 @@ public:
   bool isPieceHashVerificationAvailable() const;
 
   void setChecksumVerified(bool f) { checksumVerified_ = f; }
-
-  void setAttribute(ContextAttributeType key,
-                    std::shared_ptr<ContextAttribute> value);
-
-  const std::shared_ptr<ContextAttribute>&
-  getAttribute(ContextAttributeType key);
-
-  bool hasAttribute(ContextAttributeType key) const;
-
-  const std::vector<std::shared_ptr<ContextAttribute>>& getAttributes() const;
 
   void resetDownloadStartTime();
 

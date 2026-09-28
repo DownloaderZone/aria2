@@ -59,9 +59,7 @@ case "$1" in
 	build "--without-sqlite3" "nosqlite3"
 	build "--without-libssh2" "nolibssh2"
 	# Feature combinations
-	build "--disable-bittorrent" "nobt"
 	build "--disable-metalink" "noml"
-	build "--disable-bittorrent --disable-metalink" "nobt_noml"
 	build "--disable-epoll" "noepoll"
 	build "--disable-epoll --without-libcares" "noepoll_nocares"
 	build "--enable-libaria2" "libaria2"

@@ -20,11 +20,6 @@ class DownloadHandlersTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testGetMetalinkPreDownloadHandler_contentType);
 #endif // ENABLE_METALINK
 
-#ifdef ENABLE_BITTORRENT
-  CPPUNIT_TEST(testGetBtPreDownloadHandler_extension);
-  CPPUNIT_TEST(testGetBtPreDownloadHandler_contentType);
-#endif // ENABLE_BITTORRENT
-
   CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -38,10 +33,6 @@ public:
   void testGetMetalinkPreDownloadHandler_contentType();
 #endif // ENABLE_METALINK
 
-#ifdef ENABLE_BITTORRENT
-  void testGetBtPreDownloadHandler_extension();
-  void testGetBtPreDownloadHandler_contentType();
-#endif // ENABLE_BITTORRENT
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(DownloadHandlersTest);
@@ -84,39 +75,5 @@ void DownloadHandlersTest::testGetMetalinkPreDownloadHandler_contentType()
 }
 
 #endif // ENABLE_METALINK
-
-#ifdef ENABLE_BITTORRENT
-
-void DownloadHandlersTest::testGetBtPreDownloadHandler_extension()
-{
-  auto dctx =
-      std::make_shared<DownloadContext>(0, 0, A2_TEST_DIR "/test.torrent");
-  RequestGroup rg(GroupId::create(), option_);
-  rg.setDownloadContext(dctx);
-
-  auto handler = download_handlers::getBtPreDownloadHandler();
-
-  CPPUNIT_ASSERT(handler->canHandle(&rg));
-
-  dctx->getFirstFileEntry()->setPath(A2_TEST_DIR "/test.torrent2");
-  CPPUNIT_ASSERT(!handler->canHandle(&rg));
-}
-
-void DownloadHandlersTest::testGetBtPreDownloadHandler_contentType()
-{
-  auto dctx = std::make_shared<DownloadContext>(0, 0, "test");
-  dctx->getFirstFileEntry()->setContentType("application/x-bittorrent");
-  RequestGroup rg(GroupId::create(), option_);
-  rg.setDownloadContext(dctx);
-
-  auto handler = download_handlers::getBtPreDownloadHandler();
-
-  CPPUNIT_ASSERT(handler->canHandle(&rg));
-
-  dctx->getFirstFileEntry()->setContentType("application/octet-stream");
-  CPPUNIT_ASSERT(!handler->canHandle(&rg));
-}
-
-#endif // ENABLE_BITTORRENT
 
 } // namespace aria2

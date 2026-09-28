@@ -48,13 +48,8 @@
 #define MSG_RECEIVE_RESPONSE "CUID#%" PRId64 " - Response received:\n%s"
 #define MSG_DOWNLOAD_ABORTED "CUID#%" PRId64 " - Download aborted. URI=%s"
 #define MSG_RESTARTING_DOWNLOAD "CUID#%" PRId64 " - Restarting the download. URI=%s"
-#define MSG_TORRENT_DOWNLOAD_ABORTED "CUID#%" PRId64 " - Download aborted."
 #define MSG_MAX_TRY                                                     \
   "CUID#%" PRId64 " - %d times attempted, but no success. Download aborted."
-#define MSG_SEND_PEER_MESSAGE "CUID#%" PRId64 " - To: %s:%d %s"
-#define MSG_RECEIVE_PEER_MESSAGE "CUID#%" PRId64 " - From: %s:%d %s"
-#define MSG_GOT_NEW_PIECE "CUID#%" PRId64 " - we got new piece. index=%lu"
-#define MSG_GOT_WRONG_PIECE "CUID#%" PRId64 " - we got wrong piece. index=%lu"
 #define MSG_DOWNLOAD_NOT_COMPLETE "CUID#%" PRId64 " - Download not complete: %s"
 #define MSG_DOWNLOAD_ALREADY_COMPLETED _("GID#%s - Download has already completed: %s")
 #define MSG_RESOLVING_HOSTNAME "CUID#%" PRId64 " - Resolving hostname %s"
@@ -63,50 +58,20 @@
 #define MSG_NAME_RESOLUTION_FAILED                      \
   "CUID#%" PRId64 " - Name resolution for %s failed:%s"
 #define MSG_DNS_CACHE_HIT "CUID#%" PRId64 " - DNS cache hit: %s -> %s"
-#define MSG_CONNECTING_TO_PEER "CUID#%" PRId64 " - Connecting to the peer %s"
-#define MSG_PIECE_RECEIVED                                              \
-  "CUID#%" PRId64 " - Piece received. index=%lu, begin=%d, length=%d, offset=%" PRId64 "," \
-  " blockIndex=%lu"
-#define MSG_PIECE_BITFIELD "CUID#%" PRId64 " - Piece bitfield %s"
-#define MSG_REJECT_PIECE_CHOKED                                         \
-  "CUID#%" PRId64 " - Reject piece message in queue because the peer has been" \
-  " choked. index=%lu, begin=%d, length=%d"
-#define MSG_REJECT_PIECE_CANCEL                                         \
-  "CUID#%" PRId64 " - Reject piece message in queue because cancel message received." \
-  " index=%lu, begin=%d, length=%d"
 #define MSG_FILE_VALIDATION_FAILURE                             \
   "CUID#%" PRId64 " - Exception caught while validating file integrity."
-#define MSG_PEER_INTERESTED "CUID#%" PRId64 " - Interested in the peer"
-#define MSG_PEER_NOT_INTERESTED "CUID#%" PRId64 " - Not interested in the peer"
-#define MSG_DELETING_REQUEST_SLOT "CUID#%" PRId64 " - Deleting request slot" \
-  " index=%lu, begin=%d, blockIndex=%lu"
-#define MSG_DELETING_REQUEST_SLOT_CHOKED "CUID#%" PRId64 " - Deleting request slot" \
-  " index=%lu, begin=%d, blockIndex=%lu because localhost got choked."
-#define MSG_DELETING_REQUEST_SLOT_TIMEOUT "CUID#%" PRId64 " - Deleting request slot" \
-  " index=%lu, begin=%d, blockIndex=%lu because of time out"
-#define MSG_DELETING_REQUEST_SLOT_ACQUIRED "CUID#%" PRId64 " - Deleting request slot" \
-  " index=%lu, begin=%d, blockIndex=%lu because the block has been acquired."
-#define MSG_FAST_EXTENSION_ENABLED "CUID#%" PRId64 " - Fast extension enabled."
-#define MSG_EXTENDED_MESSAGING_ENABLED "CUID#%" PRId64 " - Extended Messaging enabled."
 #define MSG_FILE_ALLOCATION_FAILURE                             \
   "CUID#%" PRId64 " - Exception caught while allocating file space."
 #define MSG_CONTENT_DISPOSITION_DETECTED                        \
   "CUID#%" PRId64 " - Content-Disposition detected. Use %s as filename"
-#define MSG_PEER_BANNED "CUID#%" PRId64 " - Peer %s:%d banned."
 #define MSG_LISTENING_PORT                                      \
   "CUID#%" PRId64 " - Using port %d for accepting new connections"
 #define MSG_BIND_FAILURE "CUID#%" PRId64 " - An error occurred while binding port=%d"
-#define MSG_INCOMING_PEER_CONNECTION                            \
-  "CUID#%" PRId64 " - Incoming connection, adding new command CUID#%" PRId64 ""
 #define MSG_ACCEPT_FAILURE "CUID#%" PRId64 " - Error in accepting connection"
-#define MSG_TRACKER_RESPONSE_PROCESSING_FAILED                  \
-  "CUID#%" PRId64 " - Error occurred while processing tracker response."
-#define MSG_DHT_ENABLED_PEER "CUID#%" PRId64 " - The peer is DHT-enabled."
 #define MSG_CONNECT_FAILED_AND_RETRY            \
   "CUID#%" PRId64 " - Could not to connect to %s:%u. Trying another address"
 
 #define MSG_UNRECOGNIZED_URI _("Unrecognized URI or unsupported protocol: %s")
-#define MSG_TRACKER_WARNING_MESSAGE _("Tracker returned warning message: %s")
 #define MSG_SEGMENT_FILE_EXISTS _("The segment file %s exists.")
 #define MSG_SEGMENT_FILE_DOES_NOT_EXIST _("The segment file %s does not exist.")
 #define MSG_SAVING_SEGMENT_FILE _("Saving the segment file %s")
@@ -120,8 +85,6 @@
 #define MSG_NOT_DIRECTORY _("Not a directory")
 #define MSG_INSUFFICIENT_CHECKSUM _("Insufficient checksums. checksumLength=%d, numChecksum=%d")
 #define MSG_WRITING_FILE _("Writing file %s")
-#define MSG_NO_PEER_LIST_RECEIVED _("No peer list received.")
-#define MSG_ADDING_PEER _("Adding peer %s:%d")
 #define MSG_DELETING_USED_PIECE _("Deleting used piece index=%d, fillRate(%%)=%d<=%d")
 #define MSG_SELECTIVE_DOWNLOAD_COMPLETED _("Download of selected files was complete.")
 #define MSG_DOWNLOAD_COMPLETED _("The download was complete.")
@@ -132,7 +95,6 @@
   "Dispatching FileAllocationCommand for CUID#%" PRId64 "."
 #define MSG_METALINK_QUEUEING _("Metalink: Queueing %s for download.")
 #define MSG_FILE_DOWNLOAD_COMPLETED _("Download complete: %s")
-#define MSG_SEEDING_END _("Seeding is over.")
 #define MSG_NO_CHUNK_CHECKSUM _("No chunk to verify.")
 #define MSG_GOOD_CHUNK_CHECKSUM _("Good chunk checksum. hash=%s")
 #define MSG_LOADING_COOKIE_FAILED _("Failed to load cookies from %s")
@@ -149,10 +111,6 @@
 #define MSG_CANNOT_PARSE_METALINK _("Cannot parse metalink XML file. XML may be malformed.")
 #define MSG_TOO_SMALL_PAYLOAD_SIZE _("Too small payload size for %s, size=%lu.")
 #define MSG_REMOVED_DEFUNCT_CONTROL_FILE _("Removed the defunct control file %s because the download file %s doesn't exist.")
-#define MSG_SHARE_RATIO_REPORT _("Your share ratio was %.1f, uploaded/downloaded=%sB/%sB")
-#define MSG_MISSING_BT_INFO _("Missing %s in torrent metainfo.")
-#define MSG_NEGATIVE_LENGTH_BT_INFO _("%s does not allow negative integer %" PRId64 "")
-#define MSG_NULL_TRACKER_RESPONSE _("Tracker returned null data.")
 #define MSG_WINSOCK_INIT_FAILD _("Windows socket library initialization failed")
 #define MSG_TIME_HAS_PASSED _("%ld second(s) has passed. Stopping application.")
 #define MSG_SIGNATURE_SAVED _("Saved signature as %s. Please note that aria2" \
@@ -194,21 +152,15 @@
     " protocol. The integrity and confidentiality of the connection might be" \
     " compromised.\nProtocol: %s, Peer: %s")
 #define MSG_SHOW_FILES _("Printing the contents of file '%s'...")
-#define MSG_NOT_TORRENT_METALINK _("This file is neither Torrent nor Metalink" \
-                                   " file. Skipping.")
+#define MSG_NOT_METALINK _("This file is not a Metalink file. Skipping.")
 #define MSG_GID_NOT_PROVIDED "GID is not provided."
 #define MSG_CANNOT_PARSE_XML_RPC_REQUEST "Failed to parse xml-rpc request."
-#define MSG_GOOD_BYE_SEEDER "Client is in seed state: Good Bye Seeder;)"
 #define MSG_NOT_FILE _("Is '%s' a file?")
 #define MSG_INTERFACE_NOT_FOUND _("Failed to find given interface %s,"  \
                                   " cause: %s")
-#define MSG_METADATA_SAVED _("Saved metadata as %s.")
-#define MSG_METADATA_NOT_SAVED _("Saving metadata as %s failed. Maybe file" \
-                                 " already exists.")
 #define MSG_DIR_TRAVERSAL_DETECTED _("Detected directory traversal directive in %s")
 #define MSG_HASH_CHECK_NOT_DONE                                         \
   "File has already been downloaded but hash check has not been done yet."
-#define MSG_REMOVING_UNSELECTED_FILE _("GID#%s - Removing unselected file.")
 #define MSG_FILE_REMOVED _("File %s removed.")
 #define MSG_FILE_COULD_NOT_REMOVED _("File %s could not be removed.")
 
@@ -234,8 +186,6 @@
 #define EX_AUTH_FAILED _("Authorization failed.")
 #define EX_GOT_EOF _("Got EOF from the server.")
 #define EX_EOF_FROM_PEER _("Got EOF from peer.")
-#define EX_MALFORMED_META_INFO _("Malformed meta info.")
-
 #define EX_FILE_OPEN _("Failed to open the file %s, cause: %s")
 #define EX_FILE_WRITE _("Failed to write into the file %s, cause: %s")
 #define EX_FILE_READ _("Failed to read from the file %s, cause: %s")
@@ -268,17 +218,11 @@
 #define EX_FILE_ALREADY_EXISTS _("File %s exists, but %s does not exist.")
 #define EX_INVALID_PAYLOAD_SIZE                                 \
   _("Invalid payload size for %s, size=%lu. It should be %lu.")
-#define EX_INVALID_BT_MESSAGE_ID _("Invalid ID=%d for %s. It should be %d.")
 #define EX_INVALID_CHUNK_CHECKSUM "Chunk checksum validation failed. checksumIndex=%lu, offset=%" PRId64 ", expectedHash=%s, actualHash=%s"
 #define EX_DOWNLOAD_ABORTED _("Download aborted.")
 #define EX_DUPLICATE_FILE_DOWNLOAD _("File %s is being downloaded by other command.")
 #define EX_INSUFFICIENT_CHECKSUM _("Insufficient checksums.")
-#define EX_TRACKER_FAILURE _("Tracker returned failure reason: %s")
 #define EX_FLOODING_DETECTED _("Flooding detected.")
-#define EX_DROP_INACTIVE_CONNECTION \
-  _("Drop connection because no request/piece messages were exchanged in a" \
-    " certain period(%ld seconds).")
-#define EX_INFOHASH_MISMATCH_IN_SEGFILE _("The infoHash in torrent file doesn't match to one in .aria2 file.")
 #define EX_NO_SUCH_FILE_ENTRY _("No such file entry %s")
 #define EX_TOO_SLOW_DOWNLOAD_SPEED _("Too slow Downloading speed: %d <= %d(B/s), host:%s")
 #define EX_NO_HTTP_REQUEST_ENTRY_FOUND _("No HttpRequestEntry found.")

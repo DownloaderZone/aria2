@@ -90,7 +90,6 @@ const std::string ON_DOWNLOAD_PAUSE = "aria2.onDownloadPause";
 const std::string ON_DOWNLOAD_STOP = "aria2.onDownloadStop";
 const std::string ON_DOWNLOAD_COMPLETE = "aria2.onDownloadComplete";
 const std::string ON_DOWNLOAD_ERROR = "aria2.onDownloadError";
-const std::string ON_BT_DOWNLOAD_COMPLETE = "aria2.onBtDownloadComplete";
 } // namespace
 
 namespace {
@@ -107,8 +106,6 @@ const std::string& getMethodName(DownloadEvent event)
     return ON_DOWNLOAD_COMPLETE;
   case EVENT_ON_DOWNLOAD_ERROR:
     return ON_DOWNLOAD_ERROR;
-  case EVENT_ON_BT_DOWNLOAD_COMPLETE:
-    return ON_BT_DOWNLOAD_COMPLETE;
   default:
     // Not reachable
     assert(0);

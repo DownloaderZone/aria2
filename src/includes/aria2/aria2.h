@@ -48,7 +48,7 @@
 // no latency, access to the aria2 core.
 //
 // Therefore, this library is not meant to be the fine-grained,
-// customizable, complete HTTP/FTP/BitTorrent library. If you are
+// customizable, complete HTTP/FTP library. If you are
 // looking for such library for HTTP/FTP access, consider libcurl.
 
 namespace aria2 {
@@ -122,12 +122,7 @@ enum DownloadEvent {
   /**
    * Indicating download has stopped because of the error.
    */
-  EVENT_ON_DOWNLOAD_ERROR,
-  /**
-   * Indicating BitTorrent download has completed, but it may still
-   * continue to perform seeding.
-   */
-  EVENT_ON_BT_DOWNLOAD_COMPLETE
+  EVENT_ON_DOWNLOAD_ERROR
 };
 
 /**
@@ -276,11 +271,10 @@ bool isNull(A2Gid gid);
 /**
  * @function
  *
- * Adds new HTTP(S)/FTP/BitTorrent Magnet URI.  On successful return,
+ * Adds new HTTP(S)/FTP URI.  On successful return,
  * if the |gid| is not ``NULL``, the GID of added download will be
  * assigned to the |*gid|.  The |uris| includes URI to be downloaded.
- * For BitTorrent Magnet URI, the |uris| must have only one element
- * and it should be BitTorrent Magnet URI. URIs in the |uris| must
+ * URIs in the |uris| must
  * point to the same file. If you mix other URIs which point to
  * another file, aria2 does not complain but download may fail. The
  * |options| is an array of a pair of option name and value. If
@@ -315,41 +309,6 @@ int addMetalink(Session* session, std::vector<A2Gid>* gids,
 /**
  * @function
  *
- * Adds BitTorrent download. On successful return, if the |gid| is not
- * ``NULL``, the GID of added download will be assigned to the
- * |*gid|. The path to ".torrent" file is specified by the
- * |torrentFile|. BitTorrent Magnet URI cannot be used with this
- * function. Use :func:`addUri()` instead. The |webSeedUris| contains
- * URIs used for Web-seeding. For single file torrents, URI can be a
- * complete URI pointing to the resource or if URI ends with /, name
- * in torrent file is added. For multi-file torrents, name and path in
- * torrent are added to form a URI for each file. The |options| is an
- * array of a pair of option name and value.  If unknown options are
- * included in |options|, they are simply ignored. If the |position|
- * is not negative integer, the new download is inserted at position
- * in the waiting queue. If the |position| is negative or the
- * |position| is larger than the size of the queue, it is appended at
- * the end of the queue.
- *
- * This function returns 0 if it succeeds, or negative error code.
- *
- */
-int addTorrent(Session* session, A2Gid* gid, const std::string& torrentFile,
-               const std::vector<std::string>& webSeedUris,
-               const KeyVals& options, int position = -1);
-
-/**
- * @function
- *
- * Same as :func:`addTorrent()` with an empty vector as the
- * |webSeedUris|.
- */
-int addTorrent(Session* session, A2Gid* gid, const std::string& torrentFile,
-               const KeyVals& options, int position = -1);
-
-/**
- * @function
- *
  * Returns the array of active download GID.
  */
 std::vector<A2Gid> getActiveDownload(Session* session);
@@ -361,7 +320,7 @@ std::vector<A2Gid> getActiveDownload(Session* session);
  * download is in progress, it is stopped at first. The status of
  * removed download becomes :c:macro:`DOWNLOAD_REMOVED`. If the
  * |force| is true, removal will take place without any action which
- * takes time such as contacting BitTorrent tracker. This function
+ * takes time. This function
  * returns 0 if it succeeds, or negative error code.
  */
 int removeDownload(Session* session, A2Gid gid, bool force = false);
@@ -376,8 +335,8 @@ int removeDownload(Session* session, A2Gid gid, bool force = false);
  * download will not start. To change status to
  * :c:macro:`DOWNLOAD_WAITING`, use :func:`unpauseDownload()`
  * function.  If the |force| is true, pause will take place without
- * any action which takes time such as contacting BitTorrent
- * tracker. This function returns 0 if it succeeds, or negative error
+ * any action which takes time.
+ * This function returns 0 if it succeeds, or negative error
  * code.
  *
  * Please note that, to make pause work, the application must set
@@ -403,12 +362,8 @@ int unpauseDownload(Session* session, A2Gid gid);
  * dynamically. The following options can be changed for downloads in
  * :c:macro:`DOWNLOAD_ACTIVE` status:
  *
- * * :option:`bt-max-peers <--bt-max-peers>`
- * * :option:`bt-request-peer-speed-limit <--bt-request-peer-speed-limit>`
- * * :option:`bt-remove-unselected-file <--bt-remove-unselected-file>`
  * * :option:`force-save <--force-save>`
  * * :option:`max-download-limit <--max-download-limit>`
- * * :option:`max-upload-limit <-u>`
  *
  * For downloads in :c:macro:`DOWNLOAD_WAITING` or
  * :c:macro:`DOWNLOAD_PAUSED` status, in addition to the above
@@ -457,7 +412,6 @@ KeyVals getGlobalOptions(Session* session);
  * * :option:`max-concurrent-downloads <-j>`
  * * :option:`max-download-result <--max-download-result>`
  * * :option:`max-overall-download-limit <--max-overall-download-limit>`
- * * :option:`max-overall-upload-limit <--max-overall-upload-limit>`
  * * :option:`save-cookies <--save-cookies>`
  * * :option:`save-session <--save-session>`
  * * :option:`server-stat-of <--server-stat-of>`
@@ -465,7 +419,6 @@ KeyVals getGlobalOptions(Session* session);
  * In addition to them, options listed in :ref:`input-file` subsection
  * are available, except for following options:
  * :option:`checksum <--checksum>`,
- * :option:`index-out <-O>`,
  * :option:`out <-o>`,
  * :option:`pause <--pause>` and
  * :option:`select-file <--select-file>`.
@@ -566,8 +519,8 @@ int changePosition(Session* session, A2Gid gid, int pos, OffsetMode how);
  * @function
  *
  * Schedules shutdown. If the |force| is true, shutdown will take
- * place without any action which takes time such as contacting
- * BitTorrent tracker. After this call, the application must keep
+ * place without any action which takes time.
+ * After this call, the application must keep
  * calling :func:`run()` function until it returns 0.  This function
  * returns 0 if it succeeds, or negative error code.
  */
@@ -613,7 +566,7 @@ struct UriData {
 struct FileData {
   /**
    * 1-based index of the file in the download. This is the same order
-   * with the files in multi-file torrent. This index is used to get
+   * as the files in the download. This index is used to get
    * this object using :func:`DownloadHandle::getFile()` function.
    */
   int index;
@@ -638,8 +591,8 @@ struct FileData {
   int64_t completedLength;
   /**
    * true if this file is selected by ``select-file`` option. If
-   * ``select-file`` is not specified or this is single torrent or no
-   * torrent download, this value is always true.
+   * ``select-file`` is not specified or this download has no
+   * multiple files, this value is always true.
    */
   bool selected;
   /**
@@ -651,65 +604,11 @@ struct FileData {
 /**
  * @enum
  *
- * BitTorrent file mode
- */
-enum BtFileMode {
-  /**
-   * Indicating no mode. This value is used when file mode is not
-   * available.
-   */
-  BT_FILE_MODE_NONE,
-  /**
-   * Indicating single file torrent
-   */
-  BT_FILE_MODE_SINGLE,
-  /**
-   * Indicating multi file torrent
-   */
-  BT_FILE_MODE_MULTI
-};
-
-/**
- * @struct
- *
- * BitTorrent metainfo data retrieved from ".torrent" file.
- */
-struct BtMetaInfoData {
-  /**
-   * List of lists of announce URI. If ".torrent" file contains
-   * ``announce`` and no ``announce-list``, ``announce`` is converted
-   * to ``announce-list`` format.
-   */
-  std::vector<std::vector<std::string>> announceList;
-  /**
-   * ``comment`` for the torrent. ``comment.utf-8`` is used if
-   * available.
-   */
-  std::string comment;
-  /**
-   * The creation time of the torrent. The value is an integer since
-   * the Epoch, measured in seconds.
-   */
-  time_t creationDate;
-  /**
-   * File mode of the torrent.
-   */
-  BtFileMode mode;
-  /**
-   * ``name`` in ``info`` dictionary. ``name.utf-8`` is used if
-   * available.
-   */
-  std::string name;
-};
-
-/**
- * @enum
- *
  * The status of download item.
  */
 enum DownloadStatus {
   /**
-   * Indicating currently downloading/seeding.
+   * Indicating currently downloading.
    */
   DOWNLOAD_ACTIVE,
   /**
@@ -775,11 +674,6 @@ public:
    */
   virtual int getUploadSpeed() = 0;
   /**
-   * Returns 20 bytes InfoHash if BitTorrent transfer is
-   * involved. Otherwise the empty string is returned.
-   */
-  virtual const std::string& getInfoHash() = 0;
-  /**
    * Returns piece length in bytes.
    */
   virtual size_t getPieceLength() = 0;
@@ -788,7 +682,7 @@ public:
    */
   virtual int getNumPieces() = 0;
   /**
-   * Returns the number of peers/servers the client has connected to.
+   * Returns the number of servers the client has connected to.
    */
   virtual int getConnections() = 0;
   /**
@@ -815,9 +709,9 @@ public:
   virtual A2Gid getFollowing() = 0;
   /**
    * Returns the GID of a parent download. Some downloads are a part
-   * of another download. For example, if a file in Metalink has
-   * BitTorrent resource, the download of ".torrent" is a part of that
-   * file. If this download has no parent, the invalid GID is returned
+   * of another download. For example, a download generated from a
+   * Metalink file belongs to the download of that Metalink file. If
+   * this download has no parent, the invalid GID is returned
    * (``isNull(gid)`` is true).
    */
   virtual A2Gid getBelongsTo() = 0;
@@ -840,13 +734,6 @@ public:
    * is out-of-bound.
    */
   virtual FileData getFile(int index) = 0;
-  /**
-   * Returns the information retrieved from ".torrent" file. This
-   * function is only meaningful only when BitTorrent transfer is
-   * involved in the download and the download is not
-   * stopped/completed.
-   */
-  virtual BtMetaInfoData getBtMetaInfo() = 0;
   /**
    * Returns the option value denoted by the |name|.  If the option
    * denoted by the |name| is not available, returns empty string.

@@ -14,9 +14,6 @@
 #include "Exception.h"
 #include "util.h"
 #include "FileEntry.h"
-#ifdef ENABLE_BITTORRENT
-#  include "bittorrent_helper.h"
-#endif // ENABLE_BITTORRENT
 
 namespace aria2 {
 
@@ -26,11 +23,6 @@ class DownloadHelperTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testCreateRequestGroupForUri);
   CPPUNIT_TEST(testCreateRequestGroupForUri_parameterized);
   CPPUNIT_TEST(testCreateRequestGroupForUriList);
-
-#ifdef ENABLE_BITTORRENT
-  CPPUNIT_TEST(testCreateRequestGroupForUri_BitTorrent);
-  CPPUNIT_TEST(testCreateRequestGroupForBitTorrent);
-#endif // ENABLE_BITTORRENT
 
 #ifdef ENABLE_METALINK
   CPPUNIT_TEST(testCreateRequestGroupForUri_Metalink);
@@ -50,11 +42,6 @@ public:
   void testCreateRequestGroupForUri();
   void testCreateRequestGroupForUri_parameterized();
   void testCreateRequestGroupForUriList();
-
-#ifdef ENABLE_BITTORRENT
-  void testCreateRequestGroupForUri_BitTorrent();
-  void testCreateRequestGroupForBitTorrent();
-#endif // ENABLE_BITTORRENT
 
 #ifdef ENABLE_METALINK
   void testCreateRequestGroupForUri_Metalink();
@@ -160,45 +147,6 @@ void DownloadHelperTest::testCreateRequestGroupForUri_parameterized()
   }
 }
 
-#ifdef ENABLE_BITTORRENT
-void DownloadHelperTest::testCreateRequestGroupForUri_BitTorrent()
-{
-  std::vector<std::string> uris{"http://alpha/file",
-                                A2_TEST_DIR "/test.torrent",
-                                "http://bravo/file", "http://charlie/file"};
-  option_->put(PREF_MAX_CONNECTION_PER_SERVER, "1");
-  option_->put(PREF_SPLIT, "3");
-  option_->put(PREF_DIR, "/tmp");
-  option_->put(PREF_OUT, "file.out");
-  {
-    std::vector<std::shared_ptr<RequestGroup>> result;
-
-    createRequestGroupForUri(result, option_, uris);
-
-    CPPUNIT_ASSERT_EQUAL((size_t)2, result.size());
-    std::shared_ptr<RequestGroup> group = result[0];
-    auto xuris = group->getDownloadContext()->getFirstFileEntry()->getUris();
-    CPPUNIT_ASSERT_EQUAL((size_t)3, xuris.size());
-
-    CPPUNIT_ASSERT_EQUAL(uris[0], xuris[0]);
-    CPPUNIT_ASSERT_EQUAL(uris[2], xuris[1]);
-    CPPUNIT_ASSERT_EQUAL(uris[3], xuris[2]);
-
-    CPPUNIT_ASSERT_EQUAL(3, group->getNumConcurrentCommand());
-    std::shared_ptr<DownloadContext> ctx = group->getDownloadContext();
-    CPPUNIT_ASSERT_EQUAL(std::string("/tmp/file.out"), ctx->getBasePath());
-
-    std::shared_ptr<RequestGroup> torrentGroup = result[1];
-    auto auxURIs =
-        torrentGroup->getDownloadContext()->getFirstFileEntry()->getUris();
-    CPPUNIT_ASSERT(auxURIs.empty());
-    CPPUNIT_ASSERT_EQUAL(3, torrentGroup->getNumConcurrentCommand());
-    std::shared_ptr<DownloadContext> btctx = torrentGroup->getDownloadContext();
-    CPPUNIT_ASSERT_EQUAL(std::string("/tmp/aria2-test"), btctx->getBasePath());
-  }
-}
-#endif // ENABLE_BITTORRENT
-
 #ifdef ENABLE_METALINK
 void DownloadHelperTest::testCreateRequestGroupForUri_Metalink()
 {
@@ -214,12 +162,8 @@ void DownloadHelperTest::testCreateRequestGroupForUri_Metalink()
     createRequestGroupForUri(result, option_, uris);
 
 // group1: http://alpha/file, ...
-// group2-7: 6 file entry in Metalink and 1 torrent file download
-#  ifdef ENABLE_BITTORRENT
-    CPPUNIT_ASSERT_EQUAL((size_t)7, result.size());
-#  else  // !ENABLE_BITTORRENT
+// group2-6: 5 file entries in Metalink
     CPPUNIT_ASSERT_EQUAL((size_t)6, result.size());
-#  endif // !ENABLE_BITTORRENT
 
     std::shared_ptr<RequestGroup> group = result[0];
     auto xuris = group->getDownloadContext()->getFirstFileEntry()->getUris();
@@ -277,66 +221,6 @@ void DownloadHelperTest::testCreateRequestGroupForUriList()
   CPPUNIT_ASSERT_EQUAL(std::string(), fileISOCtx->getBasePath());
 }
 
-#ifdef ENABLE_BITTORRENT
-void DownloadHelperTest::testCreateRequestGroupForBitTorrent()
-{
-  std::vector<std::string> auxURIs{"http://alpha/file", "http://bravo/file",
-                                   "http://charlie/file"};
-
-  option_->put(PREF_MAX_CONNECTION_PER_SERVER, "2");
-  option_->put(PREF_SPLIT, "5");
-  option_->put(PREF_TORRENT_FILE, A2_TEST_DIR "/test.torrent");
-  option_->put(PREF_DIR, "/tmp");
-  option_->put(PREF_OUT, "file.out");
-  option_->put(PREF_BT_EXCLUDE_TRACKER, "http://tracker1");
-  {
-    std::vector<std::shared_ptr<RequestGroup>> result;
-
-    createRequestGroupForBitTorrent(result, option_, auxURIs,
-                                    option_->get(PREF_TORRENT_FILE));
-
-    CPPUNIT_ASSERT_EQUAL((size_t)1, result.size());
-
-    std::shared_ptr<RequestGroup> group = result[0];
-    auto uris = group->getDownloadContext()->getFirstFileEntry()->getUris();
-    std::sort(std::begin(uris), std::end(uris));
-    // See -s option is ignored. See processRootDictionary() in
-    // bittorrent_helper.cc
-    CPPUNIT_ASSERT_EQUAL((size_t)3, uris.size());
-    for (size_t i = 0; i < auxURIs.size(); ++i) {
-      CPPUNIT_ASSERT_EQUAL(auxURIs[i] + "/aria2-test/aria2/src/aria2c",
-                           uris[i]);
-    }
-    CPPUNIT_ASSERT_EQUAL(5, group->getNumConcurrentCommand());
-    auto attrs = bittorrent::getTorrentAttrs(group->getDownloadContext());
-    // http://tracker1 was deleted.
-    CPPUNIT_ASSERT_EQUAL((size_t)2, attrs->announceList.size());
-  }
-  {
-    // no URIs are given
-    std::vector<std::shared_ptr<RequestGroup>> result;
-    std::vector<std::string> emptyURIs;
-    createRequestGroupForBitTorrent(result, option_, emptyURIs,
-                                    option_->get(PREF_TORRENT_FILE));
-
-    CPPUNIT_ASSERT_EQUAL((size_t)1, result.size());
-    std::shared_ptr<RequestGroup> group = result[0];
-    auto uris = group->getDownloadContext()->getFirstFileEntry()->getUris();
-    CPPUNIT_ASSERT_EQUAL((size_t)0, uris.size());
-  }
-  option_->put(PREF_FORCE_SEQUENTIAL, A2_V_TRUE);
-  {
-    std::vector<std::shared_ptr<RequestGroup>> result;
-
-    createRequestGroupForBitTorrent(result, option_, auxURIs,
-                                    option_->get(PREF_TORRENT_FILE));
-
-    // See --force-requencial is ignored
-    CPPUNIT_ASSERT_EQUAL((size_t)1, result.size());
-  }
-}
-#endif // ENABLE_BITTORRENT
-
 #ifdef ENABLE_METALINK
 void DownloadHelperTest::testCreateRequestGroupForMetalink()
 {
@@ -349,11 +233,7 @@ void DownloadHelperTest::testCreateRequestGroupForMetalink()
 
     createRequestGroupForMetalink(result, option_);
 
-#  ifdef ENABLE_BITTORRENT
-    CPPUNIT_ASSERT_EQUAL((size_t)6, result.size());
-#  else  // !ENABLE_BITTORRENT
     CPPUNIT_ASSERT_EQUAL((size_t)5, result.size());
-#  endif // !ENABLE_BITTORRENT
     std::shared_ptr<RequestGroup> group = result[0];
     auto uris = group->getDownloadContext()->getFirstFileEntry()->getUris();
     std::sort(uris.begin(), uris.end());

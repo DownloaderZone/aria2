@@ -55,9 +55,6 @@
 #ifdef HAVE_OPENSSL
 #  include <openssl/opensslv.h>
 #endif // HAVE_OPENSSL
-#ifdef HAVE_LIBGMP
-#  include <gmp.h>
-#endif // HAVE_LIBGMP
 #ifdef HAVE_LIBGCRYPT
 #  include <gcrypt.h>
 #endif // HAVE_LIBGCRYPT
@@ -121,14 +118,6 @@ const char* strSupportedFeature(int feature)
 #else  // !ENABLE_ASYNC_DNS
     return nullptr;
 #endif // !ENABLE_ASYNC_DNS
-    break;
-
-  case (FEATURE_BITTORRENT):
-#ifdef ENABLE_BITTORRENT
-    return "BitTorrent";
-#else  // !ENABLE_BITTORRENT
-    return nullptr;
-#endif // !ENABLE_BITTORRENT
     break;
 
   case (FEATURE_FF3_COOKIE):
@@ -226,10 +215,6 @@ std::string usedLibs()
   // No library version in header files.
   res += "nettle ";
 #endif // HAVE_LIBNETTLE
-#ifdef HAVE_LIBGMP
-  res += fmt("GMP/%d.%d.%d ", __GNU_MP_VERSION, __GNU_MP_VERSION_MINOR,
-             __GNU_MP_VERSION_PATCHLEVEL);
-#endif // HAVE_LIBGMP
 #ifdef HAVE_LIBGCRYPT
   res += "libgcrypt/" GCRYPT_VERSION " ";
 #endif // HAVE_LIBGCRYPT

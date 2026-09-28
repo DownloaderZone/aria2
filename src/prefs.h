@@ -405,120 +405,12 @@ extern PrefPtr PREF_ALL_PROXY_USER;
 extern PrefPtr PREF_ALL_PROXY_PASSWD;
 
 /**
- * BitTorrent related preferences
+ * Metalink related file selection preferences
  */
-// values: 1*digit
-extern PrefPtr PREF_PEER_CONNECTION_TIMEOUT;
-// values: 1*digit
-extern PrefPtr PREF_BT_TIMEOUT;
-// values: 1*digit
-extern PrefPtr PREF_BT_REQUEST_TIMEOUT;
 // values: true | false
 extern PrefPtr PREF_SHOW_FILES;
-// values: 1*digit
-extern PrefPtr PREF_MAX_OVERALL_UPLOAD_LIMIT;
-// values: 1*digit
-extern PrefPtr PREF_MAX_UPLOAD_LIMIT;
-// values: a string that your file system recognizes as a file name.
-extern PrefPtr PREF_TORRENT_FILE;
-// values: 1*digit
-extern PrefPtr PREF_LISTEN_PORT;
-// values: true | false | mem
-extern PrefPtr PREF_FOLLOW_TORRENT;
 // values: 1*digit *( (,|-) 1*digit)
 extern PrefPtr PREF_SELECT_FILE;
-// values: 1*digit ['.' [ 1*digit ] ]
-extern PrefPtr PREF_SEED_TIME;
-// values: 1*digit ['.' [ 1*digit ] ]
-extern PrefPtr PREF_SEED_RATIO;
-// values: 1*digit
-extern PrefPtr PREF_BT_KEEP_ALIVE_INTERVAL;
-// values: a string, less than or equals to 20 bytes length
-extern PrefPtr PREF_PEER_ID_PREFIX;
-// values: a string representing the extended BT handshake peer user agent
-extern PrefPtr PREF_PEER_AGENT;
-// values: true | false
-extern PrefPtr PREF_ENABLE_PEER_EXCHANGE;
-// values: true | false
-extern PrefPtr PREF_ENABLE_DHT;
-// values: a string
-extern PrefPtr PREF_DHT_LISTEN_ADDR;
-// values: 1*digit
-extern PrefPtr PREF_DHT_LISTEN_PORT;
-// values: a string
-extern PrefPtr PREF_DHT_ENTRY_POINT_HOST;
-// values: 1*digit
-extern PrefPtr PREF_DHT_ENTRY_POINT_PORT;
-// values: a string (hostname:port)
-extern PrefPtr PREF_DHT_ENTRY_POINT;
-// values: a string
-extern PrefPtr PREF_DHT_FILE_PATH;
-// values: true | false
-extern PrefPtr PREF_ENABLE_DHT6;
-// values: a string
-extern PrefPtr PREF_DHT_LISTEN_ADDR6;
-// values: a string
-extern PrefPtr PREF_DHT_ENTRY_POINT_HOST6;
-// values: 1*digit
-extern PrefPtr PREF_DHT_ENTRY_POINT_PORT6;
-// values: a string (hostname:port)
-extern PrefPtr PREF_DHT_ENTRY_POINT6;
-// values: a string
-extern PrefPtr PREF_DHT_FILE_PATH6;
-// values: plain | arc4
-extern PrefPtr PREF_BT_MIN_CRYPTO_LEVEL;
-// values:: true | false
-extern PrefPtr PREF_BT_REQUIRE_CRYPTO;
-// values: 1*digit
-extern PrefPtr PREF_BT_REQUEST_PEER_SPEED_LIMIT;
-// values: 1*digit
-extern PrefPtr PREF_BT_MAX_OPEN_FILES;
-// values: true | false
-extern PrefPtr PREF_BT_SEED_UNVERIFIED;
-// values: true | false
-extern PrefPtr PREF_BT_HASH_CHECK_SEED;
-// values: 1*digit
-extern PrefPtr PREF_BT_MAX_PEERS;
-// values: a string (IP address)
-extern PrefPtr PREF_BT_EXTERNAL_IP;
-// values: 1*digit '=' a string that your file system recognizes as a file name.
-extern PrefPtr PREF_INDEX_OUT;
-// values: 1*digit
-extern PrefPtr PREF_BT_TRACKER_INTERVAL;
-// values: 1*digit
-extern PrefPtr PREF_BT_STOP_TIMEOUT;
-// values: head[=SIZE]|tail[=SIZE], ...
-extern PrefPtr PREF_BT_PRIORITIZE_PIECE;
-// values: true | false
-extern PrefPtr PREF_BT_SAVE_METADATA;
-// values: true | false
-extern PrefPtr PREF_BT_METADATA_ONLY;
-// values: true | false
-extern PrefPtr PREF_BT_ENABLE_LPD;
-// values: string
-extern PrefPtr PREF_BT_LPD_INTERFACE;
-// values: 1*digit
-extern PrefPtr PREF_BT_TRACKER_TIMEOUT;
-// values: 1*digit
-extern PrefPtr PREF_BT_TRACKER_CONNECT_TIMEOUT;
-// values: 1*digit
-extern PrefPtr PREF_DHT_MESSAGE_TIMEOUT;
-// values: string
-extern PrefPtr PREF_ON_BT_DOWNLOAD_COMPLETE;
-// values: string
-extern PrefPtr PREF_BT_TRACKER;
-// values: string
-extern PrefPtr PREF_BT_EXCLUDE_TRACKER;
-// values: true | false
-extern PrefPtr PREF_BT_REMOVE_UNSELECTED_FILE;
-// values: true |false
-extern PrefPtr PREF_BT_DETACH_SEED_ONLY;
-// values: true | false
-extern PrefPtr PREF_BT_FORCE_ENCRYPTION;
-// values: true | false
-extern PrefPtr PREF_BT_ENABLE_HOOK_AFTER_HASH_CHECK;
-// values: true | false
-extern PrefPtr PREF_BT_LOAD_SAVED_METADATA;
 
 /**
  * Metalink related preferences

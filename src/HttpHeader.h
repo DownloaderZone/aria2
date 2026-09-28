@@ -83,12 +83,10 @@ public:
     CONTENT_RANGE,
     CONTENT_TYPE,
     DIGEST,
-    INFOHASH, // Used for BitTorrent LPD
     LAST_MODIFIED,
     LINK,
     LOCATION,
     ORIGIN,
-    PORT, // Used for BitTorrent LPD
     RETRY_AFTER,
     SEC_WEBSOCKET_KEY,
     SEC_WEBSOCKET_VERSION,

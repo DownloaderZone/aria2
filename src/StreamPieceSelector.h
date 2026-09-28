@@ -41,8 +41,7 @@
 
 namespace aria2 {
 
-// Select piece for HTTP/FTP download. For BitTorrent downloads, use
-// PieceSelector interface.
+// Select piece for HTTP/FTP download.
 class StreamPieceSelector {
 public:
   virtual ~StreamPieceSelector() = default;

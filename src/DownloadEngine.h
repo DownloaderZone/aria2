@@ -65,9 +65,6 @@ class AuthConfigFactory;
 class Request;
 class EventPoll;
 class Command;
-#ifdef ENABLE_BITTORRENT
-class BtRegistry;
-#endif // ENABLE_BITTORRENT
 #ifdef ENABLE_WEBSOCKET
 namespace rpc {
 class WebSocketSessionMan;
@@ -130,10 +127,6 @@ private:
   Timer lastRefresh_;
 
   std::unique_ptr<CookieStorage> cookieStorage_;
-
-#ifdef ENABLE_BITTORRENT
-  std::unique_ptr<BtRegistry> btRegistry_;
-#endif // ENABLE_BITTORRENT
 
   CUIDCounter cuidCounter_;
 
@@ -286,13 +279,6 @@ public:
   void evictSocketPool();
 
   const std::unique_ptr<CookieStorage>& getCookieStorage() const;
-
-#ifdef ENABLE_BITTORRENT
-  const std::unique_ptr<BtRegistry>& getBtRegistry() const
-  {
-    return btRegistry_;
-  }
-#endif // ENABLE_BITTORRENT
 
   cuid_t newCUID();
 

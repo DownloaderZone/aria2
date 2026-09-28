@@ -123,7 +123,7 @@ void gatherOption(InputIterator first, InputIterator last, Pred pred,
       handler->parse(*option, opval->s());
     }
     else if (handler->getCumulative()) {
-      // header and index-out option can take array as value
+      // header option can take array as value
       const List* oplist = downcast<List>((*first).second);
       if (oplist) {
         for (auto& elem : *oplist) {
@@ -183,7 +183,7 @@ void RpcMethod::gatherChangeableOption(Option* option, Option* pendingOption,
       handler->parse(*dst, opval->s());
     }
     else if (handler->getCumulative()) {
-      // header and index-out option can take array as value
+      // header option can take array as value
       const auto oplist = downcast<List>((*first).second);
       if (oplist) {
         for (auto& elem : *oplist) {

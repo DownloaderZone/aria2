@@ -49,9 +49,6 @@
 #include "Checksum.h"
 #include "ChunkChecksum.h"
 #include "MessageDigest.h"
-#ifdef ENABLE_BITTORRENT
-#  include "magnet.h"
-#endif // ENABLE_BITTORRENT
 
 namespace aria2 {
 
@@ -205,10 +202,6 @@ void MetalinkParserController::setTypeOfResource(std::string type)
   else if (type == "https") {
     tResource_->type = MetalinkResource::TYPE_HTTPS;
   }
-  else if (type == "bittorrent" || type == "torrent") {
-    // "torrent" is Metalink4Spec
-    tResource_->type = MetalinkResource::TYPE_BITTORRENT;
-  }
   else {
     tResource_->type = MetalinkResource::TYPE_NOT_SUPPORTED;
   }
@@ -243,20 +236,7 @@ void MetalinkParserController::commitResourceTransaction()
   if (!tResource_) {
     return;
   }
-#ifdef ENABLE_BITTORRENT
-  if (tResource_->type == MetalinkResource::TYPE_BITTORRENT) {
-    auto metaurl = make_unique<MetalinkMetaurl>();
-    metaurl->url = std::move(tResource_->url);
-    metaurl->priority = tResource_->priority;
-    metaurl->mediatype = MetalinkMetaurl::MEDIATYPE_TORRENT;
-    tEntry_->metaurls.push_back(std::move(metaurl));
-  }
-  else {
-    tEntry_->resources.push_back(std::move(tResource_));
-  }
-#else  // !ENABLE_BITTORRENT
   tEntry_->resources.push_back(std::move(tResource_));
-#endif // !ENABLE_BITTORRENT
   tResource_.reset();
 }
 
@@ -548,12 +528,6 @@ void MetalinkParserController::setURLOfMetaurl(std::string url)
   if (!tMetaurl_) {
     return;
   }
-#ifdef ENABLE_BITTORRENT
-  if (magnet::parse(url)) {
-    tMetaurl_->url = std::move(url);
-  }
-  else
-#endif // ENABLE_BITTORRENT
   {
     std::string u = uri::joinUri(baseUri_, url);
     if (uri_split(nullptr, u.c_str()) == 0) {
@@ -594,11 +568,6 @@ void MetalinkParserController::commitMetaurlTransaction()
   if (!tMetaurl_) {
     return;
   }
-#ifdef ENABLE_BITTORRENT
-  if (tMetaurl_->mediatype == MetalinkMetaurl::MEDIATYPE_TORRENT) {
-    tEntry_->metaurls.push_back(std::move(tMetaurl_));
-  }
-#endif // ENABLE_BITTORRENT
   tMetaurl_.reset();
 }
 

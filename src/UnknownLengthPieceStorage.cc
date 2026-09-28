@@ -71,59 +71,6 @@ void UnknownLengthPieceStorage::initStorage()
   diskAdaptor_ = std::move(directDiskAdaptor);
 }
 
-#ifdef ENABLE_BITTORRENT
-
-bool UnknownLengthPieceStorage::hasMissingPiece(
-    const std::shared_ptr<Peer>& peer)
-{
-  abort();
-}
-
-void UnknownLengthPieceStorage::getMissingPiece(
-    std::vector<std::shared_ptr<Piece>>& pieces, size_t minMissingBlocks,
-    const std::shared_ptr<Peer>& peer, cuid_t cuid)
-{
-  abort();
-}
-
-void UnknownLengthPieceStorage::getMissingPiece(
-    std::vector<std::shared_ptr<Piece>>& pieces, size_t minMissingBlocks,
-    const std::shared_ptr<Peer>& peer,
-    const std::vector<size_t>& excludedIndexes, cuid_t cuid)
-{
-  abort();
-}
-
-void UnknownLengthPieceStorage::getMissingFastPiece(
-    std::vector<std::shared_ptr<Piece>>& pieces, size_t minMissingBlocks,
-    const std::shared_ptr<Peer>& peer, cuid_t cuid)
-{
-  abort();
-}
-
-void UnknownLengthPieceStorage::getMissingFastPiece(
-    std::vector<std::shared_ptr<Piece>>& pieces, size_t minMissingBlocks,
-    const std::shared_ptr<Peer>& peer,
-    const std::vector<size_t>& excludedIndexes, cuid_t cuid)
-{
-  abort();
-}
-
-std::shared_ptr<Piece>
-UnknownLengthPieceStorage::getMissingPiece(const std::shared_ptr<Peer>& peer,
-                                           cuid_t cuid)
-{
-  abort();
-}
-
-std::shared_ptr<Piece> UnknownLengthPieceStorage::getMissingPiece(
-    const std::shared_ptr<Peer>& peer,
-    const std::vector<size_t>& excludedIndexes, cuid_t cuid)
-{
-  abort();
-}
-#endif // ENABLE_BITTORRENT
-
 bool UnknownLengthPieceStorage::hasMissingUnusedPiece() { abort(); }
 
 std::shared_ptr<Piece>
@@ -226,8 +173,8 @@ std::shared_ptr<DiskAdaptor> UnknownLengthPieceStorage::getDiskAdaptor()
 
 int32_t UnknownLengthPieceStorage::getPieceLength(size_t index)
 {
-  // TODO Basically, PieceStorage::getPieceLength() is only used by
-  // BitTorrent, and it does not use UnknownLengthPieceStorage.
+  // TODO PieceStorage::getPieceLength() is not implemented for
+  // UnknownLengthPieceStorage.
   abort();
 }
 

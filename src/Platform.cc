@@ -68,9 +68,6 @@
 #include "console.h"
 #include "OptionParser.h"
 #include "prefs.h"
-#ifdef HAVE_LIBGMP
-#  include "a2gmp.h"
-#endif // HAVE_LIBGMP
 #include "LogFactory.h"
 #include "util.h"
 #include "SocketCore.h"
@@ -107,9 +104,6 @@ bool Platform::setUp()
     return false;
   }
   initialized_ = true;
-#ifdef HAVE_LIBGMP
-  global::initGmp();
-#endif // HAVE_LIBGMP
 #ifdef ENABLE_NLS
   setlocale(LC_CTYPE, "");
   setlocale(LC_MESSAGES, "");

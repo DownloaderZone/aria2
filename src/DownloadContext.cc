@@ -49,7 +49,6 @@ namespace aria2 {
 
 DownloadContext::DownloadContext()
     : ownerRequestGroup_(nullptr),
-      attrs_(MAX_CTX_ATTR),
       downloadStopTime_(Timer::zero()),
       pieceLength_(0),
       checksumVerified_(false),
@@ -65,7 +64,6 @@ DownloadContext::DownloadContext()
 DownloadContext::DownloadContext(int32_t pieceLength, int64_t totalLength,
                                  std::string path)
     : ownerRequestGroup_(nullptr),
-      attrs_(MAX_CTX_ATTR),
       downloadStopTime_(Timer::zero()),
       pieceLength_(pieceLength),
       checksumVerified_(false),
@@ -158,38 +156,6 @@ void DownloadContext::setFileFilter(SegList<int> sgl)
   for (; i < len; ++i) {
     fileEntries_[i]->setRequested(false);
   }
-}
-
-void DownloadContext::setAttribute(ContextAttributeType key,
-                                   std::shared_ptr<ContextAttribute> value)
-{
-  assert(key < MAX_CTX_ATTR);
-  attrs_[key] = std::move(value);
-}
-
-const std::shared_ptr<ContextAttribute>&
-DownloadContext::getAttribute(ContextAttributeType key)
-{
-  assert(key < MAX_CTX_ATTR);
-  const auto& attr = attrs_[key];
-  if (!attr) {
-    throw DL_ABORT_EX(
-        fmt("No attribute named %s", strContextAttributeType(key)));
-  }
-
-  return attr;
-}
-
-bool DownloadContext::hasAttribute(ContextAttributeType key) const
-{
-  assert(key < MAX_CTX_ATTR);
-  return attrs_[key].get();
-}
-
-const std::vector<std::shared_ptr<ContextAttribute>>&
-DownloadContext::getAttributes() const
-{
-  return attrs_;
 }
 
 void DownloadContext::releaseRuntimeResource()

@@ -3,17 +3,16 @@ aria2c(1)
 
 SYNOPSIS
 --------
-**aria2c** [<OPTIONS>] [<URI>|<MAGNET>|<TORRENT_FILE>|<METALINK_FILE>] ...
+**aria2c** [<OPTIONS>] [<URI>|<METALINK_FILE>] ...
 
 DESCRIPTION
 -----------
 
 aria2 is a utility for downloading files. The supported protocols are
-HTTP(S), FTP, SFTP, BitTorrent, and Metalink. aria2 can download a
+HTTP(S), FTP, SFTP, and Metalink. aria2 can download a
 file from multiple sources/protocols and tries to utilize your maximum
 download bandwidth. It supports downloading a file from HTTP(S)/FTP
-/SFTP and BitTorrent at the same time, while the data downloaded from
-HTTP(S)/FTP/SFTP is uploaded to the BitTorrent swarm. Using Metalink
+/SFTP and multiple sources at the same time. Using Metalink
 chunk checksums, aria2 automatically validates chunks of data while
 downloading a file.
 
@@ -79,7 +78,7 @@ Basic Options
 .. option:: -V, --check-integrity [true|false]
 
   Check file integrity by validating piece hashes or a hash of entire
-  file.  This option has effect only in BitTorrent, Metalink downloads
+  file.  This option has effect only in Metalink downloads
   with checksums or HTTP(S)/FTP downloads with
   :option:`--checksum` option.  If
   piece hashes are provided, this option can detect damaged portions
@@ -104,7 +103,7 @@ Basic Options
    options tagged with ``#http``. If non-tag word is given, print the
    usage for the options whose name includes that word.  Available
    Values: ``#basic``, ``#advanced``, ``#http``, ``#https``, ``#ftp``,
-   ``#metalink``, ``#bittorrent``, ``#cookie``, ``#hook``, ``#file``, ``#rpc``,
+    ``#metalink``, ``#cookie``, ``#hook``, ``#file``, ``#rpc``,
    ``#checksum``, ``#experimental``, ``#deprecated``, ``#help``, ``#all``
    Default: ``#basic``
 
@@ -168,8 +167,7 @@ HTTP/FTP/SFTP Options
 
   If ``true`` is given, aria2 just checks whether the remote file is
   available and doesn't download data. This option has effect on
-  HTTP/FTP download.  BitTorrent downloads are canceled if ``true`` is
-  specified.  Default: ``false``
+  HTTP/FTP download.  Default: ``false``
 
 .. option:: --lowest-speed-limit=<SPEED>
 
@@ -177,7 +175,6 @@ HTTP/FTP/SFTP Options
   value(bytes per sec).
   ``0`` means aria2 does not have a lowest speed limit.
   You can append ``K`` or ``M`` (1K = 1024, 1M = 1024K).
-  This option does not affect BitTorrent downloads.
   Default: ``0``
 
 .. option:: -x, --max-connection-per-server=<NUM>
@@ -258,7 +255,7 @@ HTTP/FTP/SFTP Options
 
   .. note::
 
-    You cannot specify a file name for Metalink or BitTorrent downloads.
+    You cannot specify a file name for Metalink downloads.
     The file name specified here is only used when the URIs fed to aria2
     are given on the command line directly, but not when using
     :option:`--input-file <-i>`, :option:`--force-sequential <-Z>` option.
@@ -631,8 +628,8 @@ FTP/SFTP Specific Options
   be used to validate server's public key when SFTP is used. If this
   option is not set, which is default, no validation takes place.
 
-BitTorrent/Metalink Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Metalink Options
+~~~~~~~~~~~~~~~~
 .. option:: --select-file=<INDEX>...
 
   Set file to download by specifying its index.
@@ -645,354 +642,15 @@ BitTorrent/Metalink Options
 
   .. note::
 
-    In multi file torrent, the adjacent files specified by this option may
-    also be downloaded. This is by design, not a bug.
+    In multi-file downloads, the adjacent files specified by this option
+    may also be downloaded. This is by design, not a bug.
     A single piece may include several files or part of files, and aria2
     writes the piece to the appropriate files.
 
 .. option:: -S, --show-files [true|false]
 
-  Print file listing of ".torrent", ".meta4" and ".metalink" file and exit.
-  In case of ".torrent" file, additional information
-  (infohash, piece length, etc) is also printed.
+  Print file listing of ".meta4" and ".metalink" file and exit.
 
-BitTorrent Specific Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. option:: --bt-detach-seed-only [true|false]
-
-  Exclude seed only downloads when counting concurrent active
-  downloads (See :option:`-j` option).  This means that if ``-j3`` is
-  given and this option is turned on and 3 downloads are active and
-  one of those enters seed mode, then it is excluded from active
-  download count (thus it becomes 2), and the next download waiting in
-  queue gets started. But be aware that seeding item is still
-  recognized as active download in RPC method.  Default: ``false``
-
-.. option:: --bt-enable-hook-after-hash-check [true|false]
-
-  Allow hook command invocation after hash check (see :option:`-V`
-  option) in BitTorrent download. By default, when hash check
-  succeeds, the command given by :option:`--on-bt-download-complete`
-  is executed. To disable this action, give ``false`` to this option.
-  Default: ``true``
-
-.. option:: --bt-enable-lpd [true|false]
-
-  Enable Local Peer Discovery.  If a private flag is set in a torrent,
-  aria2 doesn't use this feature for that download even if ``true`` is
-  given.  Default: ``false``
-
-.. option:: --bt-exclude-tracker=<URI>[,...]
-
-  Comma separated list of BitTorrent tracker's announce URI to
-  remove. You can use special value ``*`` which matches all URIs, thus
-  removes all announce URIs. When specifying ``*`` in shell
-  command-line, don't forget to escape or quote it.  See also
-  :option:`--bt-tracker` option.
-
-.. option:: --bt-external-ip=<IPADDRESS>
-
-  Specify the external IP address to use in BitTorrent download and DHT.
-  It may be sent to BitTorrent tracker. For DHT, this option should be
-  set to report that local node is downloading a particular torrent.
-  This is critical to use DHT in a private network. Although this
-  function is named ``external``, it can accept any kind of IP
-  addresses.
-
-.. option:: --bt-force-encryption [true|false]
-
-  Requires BitTorrent message payload encryption with arc4.  This is a
-  shorthand of :option:`--bt-require-crypto`
-  :option:`--bt-min-crypto-level`\=arc4.  This option does not change
-  the option value of those options.  If ``true`` is given, deny
-  legacy BitTorrent handshake and only use Obfuscation handshake and
-  always encrypt message payload.  Default: ``false``
-
-.. option:: --bt-hash-check-seed [true|false]
-
- If ``true`` is given, after hash check using :option:`--check-integrity <-V>` option and
- file is complete, continue to seed file. If you want to check file
- and download it only when it is damaged or incomplete, set this
- option to ``false``.  This option has effect only on BitTorrent download.
- Default: ``true``
-
-.. option:: --bt-load-saved-metadata [true|false]
-
-  Before getting torrent metadata from DHT when downloading with
-  magnet link, first try to read file saved by
-  :option:`--bt-save-metadata` option.  If it is successful, then skip
-  downloading metadata from DHT.
-  Default: ``false``
-
-.. option:: --bt-lpd-interface=<INTERFACE>
-
-  Use given interface for Local Peer Discovery. If this option is not
-  specified, the default interface is chosen. You can specify
-  interface name and IP address.  Possible Values: interface, IP
-  address
-
-.. option:: --bt-max-open-files=<NUM>
-
-  Specify maximum number of files to open in multi-file
-  BitTorrent/Metalink download globally.
-  Default: ``100``
-
-.. option:: --bt-max-peers=<NUM>
-
-  Specify the maximum number of peers per torrent.  ``0`` means
-  unlimited.  See also :option:`--bt-request-peer-speed-limit` option.
-  Default: ``55``
-
-.. option:: --bt-metadata-only [true|false]
-
-  Download metadata only. The file(s) described in metadata will not
-  be downloaded. This option has effect only when BitTorrent Magnet
-  URI is used. See also :option:`--bt-save-metadata` option.  Default: ``false``
-
-.. option:: --bt-min-crypto-level=plain|arc4
-
-  Set minimum level of encryption method.
-  If several encryption methods are provided by a peer, aria2 chooses the lowest
-  one which satisfies the given level.
-  Default: ``plain``
-
-.. option:: --bt-prioritize-piece=head[=<SIZE>],tail[=<SIZE>]
-
-  Try to download first and last pieces of each file first. This is
-  useful for previewing files. The argument can contain 2 keywords:
-  ``head`` and ``tail``. To include both keywords, they must be separated
-  by comma. These keywords can take one parameter, SIZE. For example,
-  if ``head=<SIZE>`` is specified, pieces in the range of first SIZE bytes
-  of each file get higher priority.  ``tail=<SIZE>`` means the range of
-  last SIZE bytes of each file. SIZE can include ``K`` or ``M`` (1K = 1024,
-  1M = 1024K). If SIZE is omitted, SIZE=1M is used.
-
-.. option:: --bt-remove-unselected-file [true|false]
-
-   Removes the unselected files when download is completed in
-   BitTorrent. To select files, use
-   :option:`--select-file` option. If it is
-   not used, all files are assumed to be selected. Please use this
-   option with care because it will actually remove files from your
-   disk.
-   Default: ``false``
-
-.. option:: --bt-require-crypto [true|false]
-
-  If ``true`` is given, aria2 doesn't accept and establish connection with legacy
-  BitTorrent handshake(\\19BitTorrent protocol).
-  Thus aria2 always uses Obfuscation handshake.
-  Default: ``false``
-
-.. option:: --bt-request-peer-speed-limit=<SPEED>
-
-  If the whole download speed of every torrent is lower than SPEED,
-  aria2 temporarily increases the number of peers to try for more
-  download speed. Configuring this option with your preferred download
-  speed can increase your download speed in some cases.
-  You can append ``K`` or ``M`` (1K = 1024, 1M = 1024K).
-  Default: ``50K``
-
-.. option:: --bt-save-metadata [true|false]
-
-  Save metadata as ".torrent" file. This option has effect only when
-  BitTorrent Magnet URI is used.  The file name is hex encoded info
-  hash with suffix ".torrent". The directory to be saved is the same
-  directory where download file is saved. If the same file already
-  exists, metadata is not saved. See also :option:`--bt-metadata-only`
-  option. Default: ``false``
-
-.. option:: --bt-seed-unverified [true|false]
-
-  Seed previously downloaded files without verifying piece hashes.
-  Default: ``false``
-
-.. option:: --bt-stop-timeout=<SEC>
-
-  Stop BitTorrent download if download speed is 0 in consecutive SEC
-  seconds. If ``0`` is given, this feature is disabled.  Default: ``0``
-
-.. option:: --bt-tracker=<URI>[,...]
-
-  Comma separated list of additional BitTorrent tracker's announce
-  URI. These URIs are not affected by :option:`--bt-exclude-tracker` option
-  because they are added after URIs in :option:`--bt-exclude-tracker` option are
-  removed.
-
-.. option:: --bt-tracker-connect-timeout=<SEC>
-
-  Set the connect timeout in seconds to establish connection to
-  tracker. After the connection is established, this option makes no
-  effect and :option:`--bt-tracker-timeout` option is used instead.  Default:
-  ``60``
-
-.. option:: --bt-tracker-interval=<SEC>
-
-  Set the interval in seconds between tracker requests. This
-  completely overrides interval value and aria2 just uses this value
-  and ignores the min interval and interval value in the response of
-  tracker. If ``0`` is set, aria2 determines interval based on the
-  response of tracker and the download progress.  Default: ``0``
-
-.. option:: --bt-tracker-timeout=<SEC>
-
-  Set timeout in seconds. Default: ``60``
-
-.. option:: --dht-entry-point=<HOST>:<PORT>
-
-  Set host and port as an entry point to IPv4 DHT network.
-
-.. option:: --dht-entry-point6=<HOST>:<PORT>
-
-  Set host and port as an entry point to IPv6 DHT network.
-
-.. option:: --dht-file-path=<PATH>
-
-  Change the IPv4 DHT routing table file to PATH.
-  Default: ``$HOME/.aria2/dht.dat`` if present, otherwise
-  ``$XDG_CACHE_HOME/aria2/dht.dat``.
-
-.. option:: --dht-file-path6=<PATH>
-
-  Change the IPv6 DHT routing table file to PATH.
-  Default: ``$HOME/.aria2/dht6.dat`` if present, otherwise
-  ``$XDG_CACHE_HOME/aria2/dht6.dat``.
-
-.. option:: --dht-listen-addr6=<ADDR>
-
-  Specify address to bind socket for IPv6 DHT.  It should be a global
-  unicast IPv6 address of the host.
-
-.. option:: --dht-listen-port=<PORT>...
-
-  Set UDP listening port used by DHT(IPv4, IPv6) and UDP tracker.
-  Multiple ports can be specified by using ``,``, for example:
-  ``6881,6885``.  You can also use ``-`` to specify a range:
-  ``6881-6999``. ``,`` and ``-`` can be used together.
-  Default: ``6881-6999``
-
-  .. note::
-
-    Make sure that the specified ports are open for incoming UDP traffic.
-
-.. option:: --dht-message-timeout=<SEC>
-
-  Set timeout in seconds. Default: ``10``
-
-.. option:: --enable-dht [true|false]
-
-  Enable IPv4 DHT functionality. It also enables UDP tracker
-  support. If a private flag is set in a torrent, aria2 doesn't use
-  DHT for that download even if ``true`` is given.  Default: ``true``
-
-.. option:: --enable-dht6 [true|false]
-
-   Enable IPv6 DHT functionality. If a private flag is set in a
-   torrent, aria2 doesn't use DHT for that download even if ``true`` is
-   given. Use :option:`--dht-listen-port` option to specify port number to
-   listen on. See also :option:`--dht-listen-addr6` option.
-
-.. option:: --enable-peer-exchange [true|false]
-
-  Enable Peer Exchange extension. If a private flag is set in a torrent, this
-  feature is disabled for that download even if ``true`` is given.
-  Default: ``true``
-
-.. option:: --follow-torrent=true|false|mem
-
-  If ``true`` or ``mem`` is specified, when a file whose suffix is ``.torrent`` or content
-  type is ``application/x-bittorrent`` is downloaded, aria2 parses it as a torrent
-  file and downloads files mentioned in it.
-  If ``mem`` is specified, a torrent file is not written to the disk, but is just
-  kept in memory.
-  If ``false`` is specified, the ``.torrent`` file is downloaded to the disk, but
-  is not parsed as a torrent and its contents are not downloaded.
-  Default: ``true``
-
-.. option:: -O, --index-out=<INDEX>=<PATH>
-
-  Set file path for file with index=INDEX. You can find the file index
-  using the :option:`--show-files <-S>` option.  PATH is a relative path to the
-  path specified in :option:`--dir <-d>` option. You can use this option multiple
-  times. Using this option, you can specify the output file names of
-  BitTorrent downloads.
-
-.. option:: --listen-port=<PORT>...
-
-  Set TCP port number for BitTorrent downloads.
-  Multiple ports can be specified by using ``,``,  for example: ``6881,6885``.
-  You can also use ``-`` to specify a range: ``6881-6999``.
-  ``,`` and ``-`` can be used together: ``6881-6889,6999``.
-  Default: ``6881-6999``
-
-  .. note::
-
-    Make sure that the specified ports are open for incoming TCP traffic.
-
-.. option:: --max-overall-upload-limit=<SPEED>
-
-  Set max overall upload speed in bytes/sec.
-  ``0`` means unrestricted.
-  You can append ``K`` or ``M`` (1K = 1024, 1M = 1024K).
-  To limit the upload speed per torrent, use :option:`--max-upload-limit <-u>` option.
-  Default: ``0``
-
-.. option:: -u, --max-upload-limit=<SPEED>
-
-  Set max upload speed per each torrent in bytes/sec.
-  ``0`` means unrestricted.
-  You can append ``K`` or ``M`` (1K = 1024, 1M = 1024K).
-  To limit the overall upload speed, use :option:`--max-overall-upload-limit` option.
-  Default: ``0``
-
-.. option:: --peer-id-prefix=<PEER_ID_PREFIX>
-
-  Specify the prefix of peer ID. The peer ID in
-  BitTorrent is 20 byte length. If more than 20
-  bytes are specified, only first 20 bytes are
-  used. If less than 20 bytes are specified, random
-  byte data are added to make its length 20 bytes.
-
-  Default: ``A2-$MAJOR-$MINOR-$PATCH-``, $MAJOR, $MINOR and $PATCH are
-  replaced by major, minor and patch version number respectively.  For
-  instance, aria2 version 1.18.8 has prefix ID ``A2-1-18-8-``.
-
-.. option:: --peer-agent=<PEER_AGENT>
-
-  Specify the string used during the bitorrent extended handshake
-  for the peer's client version.
-
-  Default: ``aria2/$MAJOR.$MINOR.$PATCH``, $MAJOR, $MINOR and $PATCH are
-  replaced by major, minor and patch version number respectively.  For
-  instance, aria2 version 1.18.8 has peer agent ``aria2/1.18.8``.
-
-.. option:: --seed-ratio=<RATIO>
-
-  Specify share ratio. Seed completed torrents until share ratio reaches
-  RATIO.
-  You are strongly encouraged to specify equals or more than ``1.0`` here.
-  Specify ``0.0`` if you intend to do seeding regardless of share ratio.
-  If :option:`--seed-time` option is specified along with this option, seeding ends when
-  at least one of the conditions is satisfied.
-  Default: ``1.0``
-
-.. option:: --seed-time=<MINUTES>
-
-  Specify seeding time in (fractional) minutes. Also see the
-  :option:`--seed-ratio` option.
-
-  .. note::
-
-    Specifying :option:`--seed-time=0 <--seed-time>` disables seeding after download completed.
-
-.. option:: -T, --torrent-file=<TORRENT_FILE>
-
-  The path to the ".torrent" file.  You are not required to use this
-  option because you can specify ".torrent" files without :option:`--torrent-file <-T>`.
-
-Metalink Specific Options
-~~~~~~~~~~~~~~~~~~~~~~~~~
 .. option:: --follow-metalink=true|false|mem
 
   If ``true`` or ``mem`` is specified, when a file whose suffix is ``.meta4`` or ``.metalink`` or content
@@ -1066,10 +724,9 @@ RPC Options
 
 .. option:: --pause-metadata [true|false]
 
-  Pause downloads created as a result of metadata download. There are
-  3 types of metadata downloads in aria2: (1) downloading .torrent
-  file. (2) downloading torrent metadata using magnet link. (3)
-  downloading metalink file.  These metadata downloads will generate
+  Pause downloads created as a result of metadata download. The only
+  type of metadata download in aria2 is downloading a metalink file.
+  These metadata downloads will generate
   downloads using their metadata. This option pauses these subsequent
   downloads. This option is effective only when
   :option:`--enable-rpc=true <--enable-rpc>` is given.
@@ -1140,13 +797,11 @@ RPC Options
 
 .. option:: --rpc-save-upload-metadata [true|false]
 
-  Save the uploaded torrent or metalink metadata in the directory
-  specified by :option:`--dir` option. The file name consists of SHA-1
-  hash hex string of metadata plus extension. For torrent, the
-  extension is '.torrent'. For metalink, it is '.meta4'.  If false is
-  given to this option, the downloads added by
-  :func:`aria2.addTorrent` or :func:`aria2.addMetalink` will not be
-  saved by :option:`--save-session` option. Default: ``true``
+  Save the uploaded metalink metadata in the directory specified by
+  :option:`--dir` option. The file name consists of SHA-1 hash hex
+  string of metadata plus extension '.meta4'.  If false is given to
+  this option, the downloads added by :func:`aria2.addMetalink` will
+  not be saved by :option:`--save-session` option. Default: ``true``
 
 .. option:: --rpc-secret=<TOKEN>
 
@@ -1309,8 +964,8 @@ Advanced Options
 
 .. option:: --dscp=<DSCP>
 
-  Set DSCP value in outgoing IP packets of BitTorrent traffic for
-  QoS. This parameter sets only DSCP bits in TOS field of IP packets,
+  Set DSCP value in outgoing IP packets for QoS. This parameter sets
+  only DSCP bits in TOS field of IP packets,
   not the whole field. If you take values from
   */usr/include/netinet/ip.h* divide them by 4 (otherwise values would
   be incorrect, e.g. your ``CS1`` class would turn into ``CS4``). If
@@ -1383,15 +1038,14 @@ Advanced Options
 
   .. note::
 
-    In multi file torrent downloads, the files adjacent forward to the specified files
-    are also allocated if they share the same piece.
+    In multi-file downloads, the files adjacent forward to the specified
+    files are also allocated if they share the same piece.
 
 .. option:: --force-save [true|false]
 
   Save download with :option:`--save-session <--save-session>` option
   even if the download is completed or removed. This option also saves
-  control file in that situations. This may be useful to save
-  BitTorrent seeding which is recognized as completed state.
+  control file in that situations.
   Default: ``false``
 
 .. option:: --save-not-found [true|false]
@@ -1498,15 +1152,6 @@ Advanced Options
   LEVEL is either ``debug``, ``info``, ``notice``, ``warn`` or ``error``.
   Default: ``debug``
 
-.. option:: --on-bt-download-complete=<COMMAND>
-
-  For BitTorrent, a command specified in :option:`--on-download-complete` is
-  called after download completed and seeding is over. On the other
-  hand, this option set the command to be executed after download
-  completed but before seeding.
-  See `Event Hook`_ for more details about COMMAND.
-  Possible Values: ``/path/to/command``
-
 .. option:: --on-download-complete=<COMMAND>
 
   Set the command to be executed after download completed.
@@ -1561,8 +1206,7 @@ Advanced Options
 
   Set a piece length for HTTP/FTP downloads. This is the boundary when
   aria2 splits a file. All splits occur at multiple of this
-  length. This option will be ignored in BitTorrent downloads.  It
-  will be also ignored if Metalink file contains piece hashes.
+  length. It will be also ignored if Metalink file contains piece hashes.
   Default: ``1M``
 
   .. note::
@@ -1655,8 +1299,8 @@ Advanced Options
   restart. If you like the output to be gzipped append a .gz extension to
   the file name.
   Please note that downloads added by
-  :func:`aria2.addTorrent` and :func:`aria2.addMetalink` RPC method
-  and whose metadata could not be saved as a file are not saved.
+  :func:`aria2.addMetalink` RPC method and whose metadata could not
+  be saved as a file are not saved.
   Downloads removed using :func:`aria2.remove` and
   :func:`aria2.forceRemove` will not be saved. GID is also saved with
   :option:`gid <--gid>`, but there are some restrictions, see below.
@@ -1664,17 +1308,11 @@ Advanced Options
   .. note::
 
     Normally, GID of the download itself is saved. But some downloads
-    use metadata (e.g., BitTorrent and Metalink). In this case, there
-    are some restrictions.
+    use metadata (e.g., Metalink). In this case, there are some
+    restrictions.
 
-    magnet URI, and followed by torrent download
-       GID of BitTorrent metadata download is saved.
-    URI to torrent file, and followed by torrent download
-       GID of torrent file download is saved.
     URI to metalink file, and followed by file downloads described in metalink file
        GID of metalink file download is saved.
-    local torrent file
-       GID of torrent download is saved.
     local metalink file
        Any meaningful GID is not saved.
 
@@ -1736,35 +1374,16 @@ Some options takes ``K`` and ``M`` to conveniently represent 1024 and
 case-insensitive way. In other words, ``k`` and ``m`` can be used as
 well as ``K`` and ``M`` respectively.
 
-URI, MAGNET, TORRENT_FILE, METALINK_FILE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+URI, METALINK_FILE
+~~~~~~~~~~~~~~~~~~
 
 You can specify multiple URIs in command-line.  Unless you specify
 :option:`--force-sequential <-Z>` option, all URIs must point to the same file or downloading will
 fail.
 
-You can specify arbitrary number of BitTorrent Magnet URI. Please note
-that they are always treated as a separate download.  Both hex encoded
-40 characters Info Hash and Base32 encoded 32 characters Info Hash are
-supported. The multiple ``tr`` parameters are supported.  Because
-BitTorrent Magnet URI is likely to contain ``&`` character, it is highly
-recommended to always quote URI with single(``'``) or double(``"``) quotation.
-It is strongly recommended to enable DHT especially when ``tr``
-parameter is missing. See http://www.bittorrent.org/beps/bep_0009.html
-for more details about BitTorrent Magnet URI.
-
-You can also specify arbitrary number of torrent files and Metalink
-documents stored on a local drive. Please note that they are always
-treated as a separate download. Both Metalink4 and Metalink version
-3.0 are supported.
-
-You can specify both torrent file with -T option and URIs. By doing
-this, you can download a file from both torrent swarm and
-HTTP(S)/FTP/SFTP server at the same time, while the data from
-HTTP(S)/FTP/SFTP are uploaded to the torrent swarm.  For single file
-torrents, URI can be a complete URI pointing to the resource or if URI
-ends with /, name in torrent file in torrent is added. For multi-file
-torrents, name and path are added to form a URI for each file.
+You can also specify arbitrary number of Metalink documents stored on
+a local drive. Please note that they are always treated as a separate
+download. Both Metalink4 and Metalink version 3.0 are supported.
 
 .. note::
 
@@ -1786,7 +1405,6 @@ Event Hook
 
 aria2 provides options to specify arbitrary command after specific event
 occurred. Currently following options are available:
-:option:`--on-bt-download-complete`,
 :option:`--on-download-pause`,
 :option:`--on-download-complete`.
 :option:`--on-download-start`,
@@ -1796,7 +1414,7 @@ occurred. Currently following options are available:
 aria2 passes 3 arguments to specified command when it is executed.
 These arguments are: GID, the number of files and file path.  For
 HTTP, FTP, and SFTP downloads, usually the number of files is 1.
-BitTorrent download can contain multiple files.  If number of files is
+Metalink downloads can contain multiple files.  If number of files is
 more than one, file path is first one.  In other words, this is the
 value of path key of first struct whose selected key is true in the
 response of :func:`aria2.getFiles` RPC method.  If you want to get all
@@ -1866,9 +1484,6 @@ based on the last error encountered.
 11
   If aria2 was downloading same file at that moment.
 
-12
-  If aria2 was downloading same info hash torrent at that moment.
-
 13
   If file already existed. See :option:`--allow-overwrite` option.
 
@@ -1904,15 +1519,6 @@ based on the last error encountered.
 
 24
   If HTTP authorization failed.
-
-25
-  If aria2 could not parse bencoded file (usually ".torrent" file).
-
-26
-  If ".torrent" file was corrupted or missing information that aria2 needed.
-
-27
-  If Magnet URI was bad.
 
 28
   If bad/unrecognized option was given or unexpected option argument
@@ -1991,10 +1597,8 @@ line. In each line, you can specify name-value pair in the format:
 lines beginning ``#`` are treated as comments::
 
   # sample configuration file for aria2c
-  listen-port=60000
-  dht-listen-port=60000
-  seed-ratio=1.0
-  max-upload-limit=50K
+  max-connection-per-server=16
+  split=16
   ftp-pasv=true
 
 .. note::
@@ -2013,15 +1617,12 @@ user's home directory:
 
 * :option:`ca-certificate <--ca-certificate>`
 * :option:`certificate <--certificate>`
-* :option:`dht-file-path <--dht-file-path>`
-* :option:`dht-file-path6 <--dht-file-path6>`
 * :option:`dir <--dir>`
 * :option:`input-file <--input-file>`
 * :option:`load-cookies <--load-cookies>`
 * :option:`log <--log>`
 * :option:`metalink-file <--metalink-file>`
 * :option:`netrc-path <--netrc-path>`
-* :option:`on-bt-download-complete <--on-bt-download-complete>`
 * :option:`on-download-complete <--on-download-complete>`
 * :option:`on-download-error <--on-download-error>`
 * :option:`on-download-start <--on-download-start>`
@@ -2035,20 +1636,10 @@ user's home directory:
 * :option:`save-session <--save-session>`
 * :option:`server-stat-if <--server-stat-if>`
 * :option:`server-stat-of <--server-stat-of>`
-* :option:`torrent-file <--torrent-file>`
 
 Note that this expansion occurs even if the above options are used in
 the command-line.  This means that expansion may occur 2 times: first,
 shell and then aria2c.
-
-dht.dat
-~~~~~~~~
-
-Unless the legacy file paths ``$HOME/.aria2/dht.dat`` and
-``$HOME/.aria2/dht6.dat`` are pointing to existing files, the routing
-table of IPv4 DHT is saved to the path
-``$XDG_CACHE_HOME/aria2/dht.dat`` and the routing table of IPv6 DHT is
-saved to the path ``$XDG_CACHE_HOME/aria2/dht6.dat``.
 
 Netrc
 ~~~~~
@@ -2079,11 +1670,7 @@ aria2 uses a control file to track the progress of a download.  A
 control file is placed in the same directory as the downloading file
 and its file name is the file name of downloading file with ``.aria2``
 appended.  For example, if you are downloading file.zip, then the
-control file should be file.zip.aria2.  (There is a exception for this
-naming convention.  If you are downloading a multi torrent, its
-control file is the "top directory" name of the torrent with ``.aria2``
-appended.  The "top directory" name is a value of "name" key in "info"
-directory in a torrent file.)
+control file should be file.zip.aria2.
 
 Usually a control file is deleted once download completed.  If aria2
 decides that download cannot be resumed(for example, when downloading
@@ -2091,9 +1678,9 @@ a file from a HTTP server which doesn't support resume), a control
 file is not created.
 
 Normally if you lose a control file, you cannot resume download.  But
-if you have a torrent or metalink with chunk checksums for the file,
-you can resume the download without a control file by giving -V option
-to aria2c in command-line.
+if you have a metalink with chunk checksums for the file, you can
+resume the download without a control file by giving -V option to
+aria2c in command-line.
 
 .. _input-file:
 
@@ -2126,27 +1713,6 @@ of URIs. These optional lines must start with white space(s).
   * :option:`always-resume <--always-resume>`
   * :option:`async-dns <--async-dns>`
   * :option:`auto-file-renaming <--auto-file-renaming>`
-  * :option:`bt-enable-hook-after-hash-check <--bt-enable-hook-after-hash-check>`
-  * :option:`bt-enable-lpd <--bt-enable-lpd>`
-  * :option:`bt-exclude-tracker <--bt-exclude-tracker>`
-  * :option:`bt-external-ip <--bt-external-ip>`
-  * :option:`bt-force-encryption <--bt-force-encryption>`
-  * :option:`bt-hash-check-seed <--bt-hash-check-seed>`
-  * :option:`bt-load-saved-metadata <--bt-load-saved-metadata>`
-  * :option:`bt-max-peers <--bt-max-peers>`
-  * :option:`bt-metadata-only <--bt-metadata-only>`
-  * :option:`bt-min-crypto-level <--bt-min-crypto-level>`
-  * :option:`bt-prioritize-piece <--bt-prioritize-piece>`
-  * :option:`bt-remove-unselected-file <--bt-remove-unselected-file>`
-  * :option:`bt-request-peer-speed-limit <--bt-request-peer-speed-limit>`
-  * :option:`bt-require-crypto <--bt-require-crypto>`
-  * :option:`bt-save-metadata <--bt-save-metadata>`
-  * :option:`bt-seed-unverified <--bt-seed-unverified>`
-  * :option:`bt-stop-timeout <--bt-stop-timeout>`
-  * :option:`bt-tracker <--bt-tracker>`
-  * :option:`bt-tracker-connect-timeout <--bt-tracker-connect-timeout>`
-  * :option:`bt-tracker-interval <--bt-tracker-interval>`
-  * :option:`bt-tracker-timeout <--bt-tracker-timeout>`
   * :option:`check-integrity <-V>`
   * :option:`checksum <--checksum>`
   * :option:`conditional-get <--conditional-get>`
@@ -2158,10 +1724,8 @@ of URIs. These optional lines must start with white space(s).
   * :option:`enable-http-keep-alive <--enable-http-keep-alive>`
   * :option:`enable-http-pipelining <--enable-http-pipelining>`
   * :option:`enable-mmap <--enable-mmap>`
-  * :option:`enable-peer-exchange <--enable-peer-exchange>`
   * :option:`file-allocation <--file-allocation>`
   * :option:`follow-metalink <--follow-metalink>`
-  * :option:`follow-torrent <--follow-torrent>`
   * :option:`force-save <--force-save>`
   * :option:`ftp-passwd <--ftp-passwd>`
   * :option:`ftp-pasv <-p>`
@@ -2185,7 +1749,6 @@ of URIs. These optional lines must start with white space(s).
   * :option:`https-proxy <--https-proxy>`
   * :option:`https-proxy-passwd <--https-proxy-passwd>`
   * :option:`https-proxy-user <--https-proxy-user>`
-  * :option:`index-out <-O>`
   * :option:`lowest-speed-limit <--lowest-speed-limit>`
   * :option:`max-connection-per-server <-x>`
   * :option:`max-download-limit <--max-download-limit>`
@@ -2193,7 +1756,6 @@ of URIs. These optional lines must start with white space(s).
   * :option:`max-mmap-limit <--max-mmap-limit>`
   * :option:`max-resume-failure-tries <--max-resume-failure-tries>`
   * :option:`max-tries <-m>`
-  * :option:`max-upload-limit <-u>`
   * :option:`metalink-base-uri <--metalink-base-uri>`
   * :option:`metalink-enable-unique-protocol <--metalink-enable-unique-protocol>`
   * :option:`metalink-language <--metalink-language>`
@@ -2218,8 +1780,6 @@ of URIs. These optional lines must start with white space(s).
   * :option:`retry-wait <--retry-wait>`
   * :option:`reuse-uri <--reuse-uri>`
   * :option:`rpc-save-upload-metadata <--rpc-save-upload-metadata>`
-  * :option:`seed-ratio <--seed-ratio>`
-  * :option:`seed-time <--seed-time>`
   * :option:`select-file <--select-file>`
   * :option:`split <-s>`
   * :option:`ssh-host-key-md <--ssh-host-key-md>`
@@ -2391,11 +1951,10 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
 .. function:: aria2.addUri([secret], uris[, options[, position]])
 
   This method adds a new download. *uris* is an array of
-  HTTP/FTP/SFTP/BitTorrent URIs (strings) pointing to the same
+  HTTP/FTP/SFTP URIs (strings) pointing to the same
   resource.  If you mix URIs pointing to different resources, then the
-  download may fail or be corrupted without aria2 complaining.  When
-  adding BitTorrent Magnet URIs, *uris* must have only one element and
-  it should be BitTorrent Magnet URI.  *options* is a struct and its
+  download may fail or be corrupted without aria2 complaining.
+  *options* is a struct and its
   members are pairs of option name and value.  See :ref:`rpc_options`
   below for more details.  If *position* is given, it must be an
   integer starting from 0. The new download will be inserted at
@@ -2436,56 +1995,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
 
     >>> s.aria2.addUri(['http://example.org/file'], {}, 0)
     'ca3d829cee549a4d'
-
-.. function:: aria2.addTorrent([secret], torrent[, uris[, options[, position]]])
-
-  This method adds a BitTorrent download by uploading a ".torrent" file.
-  If you want to add a BitTorrent Magnet URI, use the :func:`aria2.addUri`
-  method instead.  *torrent* must be a base64-encoded string containing the
-  contents of the ".torrent" file.
-  *uris* is an array of URIs (string). *uris* is used for
-  Web-seeding.  For single file torrents, the URI can be a complete URI
-  pointing to the resource; if URI ends with /, name in torrent file
-  is added. For multi-file torrents, name and path in torrent are
-  added to form a URI for each file.
-  *options* is a struct and its members are pairs of option name and value.
-  See :ref:`rpc_options` below for more details.
-  If *position* is given, it must be an integer starting from 0. The new
-  download will be inserted at *position* in the waiting queue. If
-  *position* is omitted or *position* is larger than the current size of the
-  queue, the new download is appended to the end of the queue.
-  This method returns the GID of the newly registered download.
-  If :option:`--rpc-save-upload-metadata` is ``true``, the
-  uploaded data is saved as a file named as the hex string of SHA-1 hash of
-  data plus ".torrent" in the directory specified by :option:`--dir
-  <-d>` option.  E.g. a file name might be
-  ``0a3893293e27ac0490424c06de4d09242215f0a6.torrent``.  If a file with the
-  same name already exists, it is overwritten!  If the file cannot be saved
-  successfully or :option:`--rpc-save-upload-metadata` is ``false``,
-  the downloads added by this method are not saved by :option:`--save-session`.
-
-  The following examples add local file ``file.torrent``.
-
-  **JSON-RPC Example**
-
-  ::
-
-    >>> import urllib2, json, base64
-    >>> torrent = base64.b64encode(open('file.torrent').read())
-    >>> jsonreq = json.dumps({'jsonrpc':'2.0', 'id':'asdf',
-    ...                       'method':'aria2.addTorrent', 'params':[torrent]})
-    >>> c = urllib2.urlopen('http://localhost:6800/jsonrpc', jsonreq)
-    >>> c.read()
-    '{"id":"asdf","jsonrpc":"2.0","result":"2089b05ecca3d829"}'
-
-  **XML-RPC Example**
-
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.aria2.addTorrent(xmlrpclib.Binary(open('file.torrent', mode='rb').read()))
-    '2089b05ecca3d829'
 
 .. function:: aria2.addMetalink([secret], metalink[, options[, position]])
 
@@ -2567,8 +2076,7 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
 
   This method removes the download denoted by *gid*.  This method
   behaves just like :func:`aria2.remove` except that this method removes
-  the download without performing any actions which take time, such as
-  contacting BitTorrent trackers to unregister the download first.
+  the download without performing any actions which take time.
 
 .. function:: aria2.pause([secret], gid)
 
@@ -2588,8 +2096,7 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
 
   This method pauses the download denoted by *gid*.  This method
   behaves just like :func:`aria2.pause` except that this method pauses
-  downloads without performing any actions which take time, such as contacting
-  BitTorrent trackers to unregister the download first.
+  downloads without performing any actions which take time.
 
 .. function:: aria2.forcePauseAll([secret])
 
@@ -2622,7 +2129,7 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     GID of the download.
 
   ``status``
-    ``active`` for currently downloading/seeding downloads.
+    ``active`` for currently downloading downloads.
     ``waiting`` for downloads in the queue; download is not started.
     ``paused`` for paused downloads.
     ``error`` for downloads that were stopped  because of error.
@@ -2651,16 +2158,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
   ``uploadSpeed``
     Upload speed of this download measured in bytes/sec.
 
-  ``infoHash``
-    InfoHash. BitTorrent only.
-
-  ``numSeeders``
-    The number of seeders aria2 has connected to. BitTorrent only.
-
-  ``seeder``
-    ``true`` if the local endpoint is a seeder. Otherwise ``false``.
-    BitTorrent only.
-
   ``pieceLength``
     Piece length in bytes.
 
@@ -2668,7 +2165,7 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     The number of pieces.
 
   ``connections``
-    The number of peers/servers aria2 has connected to.
+    The number of servers aria2 has connected to.
 
   ``errorCode``
     The code of the last error for this item, if any. The value
@@ -2693,10 +2190,8 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
 
   ``belongsTo``
     GID of a parent download. Some downloads are a part of another
-    download.  For example, if a file in a Metalink has BitTorrent
-    resources, the downloads of ".torrent" files are parts of that parent.
-    If this download has no parent, this key will not be included in the
-    response.
+    download.  If this download has no parent, this key will not be
+    included in the response.
 
   ``dir``
     Directory to save files.
@@ -2704,32 +2199,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
   ``files``
     Returns the list of files. The elements of this list are the same structs
     used in :func:`aria2.getFiles` method.
-
-  ``bittorrent``
-    Struct which contains information retrieved from the .torrent
-    (file). BitTorrent only. It contains following keys.
-
-    ``announceList``
-      List of lists of announce URIs. If the torrent contains ``announce``
-      and no ``announce-list``, ``announce`` is converted to the
-      ``announce-list`` format.
-
-    ``comment``
-      The comment of the torrent. ``comment.utf-8`` is used if available.
-
-    ``creationDate``
-      The creation time of the torrent. The value is an integer since
-      the epoch, measured in seconds.
-
-    ``mode``
-      File mode of the torrent. The value is either ``single`` or ``multi``.
-
-    ``info``
-      Struct which contains data from Info dictionary. It contains
-      following keys.
-
-      ``name``
-        name in info dictionary. ``name.utf-8`` is used if available.
 
   ``verifiedLength``
     The number of verified number of bytes while the files are being
@@ -2871,7 +2340,7 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
 
   ``index``
     Index of the file, starting at 1, in the same order as files appear in the
-    multi-file torrent.
+    multi-file download.
 
   ``path``
     File path.
@@ -2890,9 +2359,8 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
 
   ``selected``
     ``true`` if this file is selected by :option:`--select-file` option. If
-    :option:`--select-file` is not specified or this is single-file torrent or
-    not a torrent download at all, this value is always ``true``. Otherwise
-    ``false``.
+    :option:`--select-file` is not specified or this is a single-file
+    download, this value is always ``true``. Otherwise ``false``.
 
   ``uris``
     Returns a list of URIs for this file. The element type is the same struct
@@ -2933,100 +2401,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
       'selected': 'true',
       'uris': [{'status': 'used',
                 'uri': 'http://example.org/file'}]}]
-
-.. function:: aria2.getPeers([secret], gid)
-
-  This method returns a list peers of the download denoted by *gid* (string).
-  This method is for BitTorrent only.  The response is an array of structs and
-  contains the following keys. Values are strings.
-
-  ``peerId``
-    Percent-encoded peer ID.
-
-  ``ip``
-    IP address of the peer.
-
-  ``port``
-    Port number of the peer.
-
-  ``bitfield``
-    Hexadecimal representation of the download progress of the peer. The
-    highest bit corresponds to the piece at index 0. Set bits indicate the
-    piece is available and unset bits indicate the piece is missing. Any
-    spare bits at the end are set to zero.
-
-  ``amChoking``
-    ``true`` if aria2 is choking the peer. Otherwise ``false``.
-
-  ``peerChoking``
-    ``true`` if the peer is choking aria2. Otherwise ``false``.
-
-  ``downloadSpeed``
-    Download speed (byte/sec) that this client obtains from the peer.
-
-  ``uploadSpeed``
-    Upload speed(byte/sec) that this client uploads to the peer.
-
-  ``seeder``
-    ``true`` if this peer is a seeder. Otherwise ``false``.
-
-  **JSON-RPC Example**
-  ::
-
-    >>> import urllib2, json
-    >>> from pprint import pprint
-    >>> jsonreq = json.dumps({'jsonrpc':'2.0', 'id':'qwer',
-    ...                       'method':'aria2.getPeers',
-    ...                       'params':['2089b05ecca3d829']})
-    >>> c = urllib2.urlopen('http://localhost:6800/jsonrpc', jsonreq)
-    >>> pprint(json.loads(c.read()))
-    {u'id': u'qwer',
-     u'jsonrpc': u'2.0',
-     u'result': [{u'amChoking': u'true',
-                  u'bitfield': u'ffffffffffffffffffffffffffffffffffffffff',
-                  u'downloadSpeed': u'10602',
-                  u'ip': u'10.0.0.9',
-                  u'peerChoking': u'false',
-                  u'peerId': u'aria2%2F1%2E10%2E5%2D%87%2A%EDz%2F%F7%E6',
-                  u'port': u'6881',
-                  u'seeder': u'true',
-                  u'uploadSpeed': u'0'},
-                 {u'amChoking': u'false',
-                  u'bitfield': u'ffffeff0fffffffbfffffff9fffffcfff7f4ffff',
-                  u'downloadSpeed': u'8654',
-                  u'ip': u'10.0.0.30',
-                  u'peerChoking': u'false',
-                  u'peerId': u'bittorrent client758',
-                  u'port': u'37842',
-                  u'seeder': u'false',
-                  u'uploadSpeed': u'6890'}]}
-
-  **XML-RPC Example**
-  ::
-
-    >>> import xmlrpclib
-    >>> from pprint import pprint
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> r = s.aria2.getPeers('2089b05ecca3d829')
-    >>> pprint(r)
-    [{'amChoking': 'true',
-      'bitfield': 'ffffffffffffffffffffffffffffffffffffffff',
-      'downloadSpeed': '10602',
-      'ip': '10.0.0.9',
-      'peerChoking': 'false',
-      'peerId': 'aria2%2F1%2E10%2E5%2D%87%2A%EDz%2F%F7%E6',
-      'port': '6881',
-      'seeder': 'true',
-      'uploadSpeed': '0'},
-     {'amChoking': 'false',
-      'bitfield': 'ffffeff0fffffffbfffffff9fffffcfff7f4ffff',
-      'downloadSpeed': '8654',
-      'ip': '10.0.0.30',
-      'peerChoking': 'false',
-      'peerId': 'bittorrent client758',
-      'port': '37842',
-      'seeder': 'false,
-      'uploadSpeed': '6890'}]
 
 .. function:: aria2.getServers([secret], gid)
 
@@ -3283,12 +2657,8 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
   active download makes it restart (restart itself is managed by
   aria2, and no user intervention is required):
 
-  * :option:`bt-max-peers <--bt-max-peers>`
-  * :option:`bt-request-peer-speed-limit <--bt-request-peer-speed-limit>`
-  * :option:`bt-remove-unselected-file <--bt-remove-unselected-file>`
   * :option:`force-save <--force-save>`
   * :option:`max-download-limit <--max-download-limit>`
-  * :option:`max-upload-limit <-u>`
 
   This method returns ``OK`` for success.
 
@@ -3334,7 +2704,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
   This method changes global options dynamically.  *options* is a struct.
   The following options are available:
 
-  * :option:`bt-max-open-files <--bt-max-open-files>`
   * :option:`download-result <--download-result>`
   * :option:`keep-unfinished-download-result <--keep-unfinished-download-result>`
   * :option:`log <-l>`
@@ -3342,7 +2711,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
   * :option:`max-concurrent-downloads <-j>`
   * :option:`max-download-result <--max-download-result>`
   * :option:`max-overall-download-limit <--max-overall-download-limit>`
-  * :option:`max-overall-upload-limit <--max-overall-upload-limit>`
   * :option:`optimize-concurrent-downloads <--optimize-concurrent-downloads>`
   * :option:`save-cookies <--save-cookies>`
   * :option:`save-session <--save-session>`
@@ -3351,7 +2719,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
   In addition, options listed in the `Input File`_ subsection
   are available, **except** for following options:
   :option:`checksum <--checksum>`,
-  :option:`index-out <-O>`,
   :option:`out <-o>`,
   :option:`pause <--pause>` and
   :option:`select-file <--select-file>`.
@@ -3476,7 +2843,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     {u'id': u'qwer',
      u'jsonrpc': u'2.0',
      u'result': {u'enabledFeatures': [u'Async DNS',
-                                      u'BitTorrent',
                                       u'Firefox3 Cookie',
                                       u'GZip',
                                       u'HTTPS',
@@ -3494,7 +2860,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     >>> r = s.aria2.getVersion()
     >>> pprint(r)
     {'enabledFeatures': ['Async DNS',
-                         'BitTorrent',
                          'Firefox3 Cookie',
                          'GZip',
                          'HTTPS',
@@ -3539,8 +2904,7 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
 .. function:: aria2.forceShutdown([secret])
 
   This method shuts down :func:`aria2`. This method behaves like
-  :func:'aria2.shutdown` without performing any actions which take time,
-  such as contacting BitTorrent trackers to unregister downloads first.
+  :func:'aria2.shutdown` without performing any actions which take time.
   This method returns ``OK``.
 
 
@@ -3562,19 +2926,20 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
   fails.
 
   In the following examples, we add 2 downloads. The first one is
-  ``http://example.org/file`` and the second one is ``file.torrent``.
+  ``http://example.org/file`` and the second one is
+  ``http://example.org/file2``.
 
   **JSON-RPC Example**
   ::
 
-    >>> import urllib2, json, base64
+    >>> import urllib2, json
     >>> from pprint import pprint
     >>> jsonreq = json.dumps({'jsonrpc':'2.0', 'id':'qwer',
     ...                       'method':'system.multicall',
     ...                       'params':[[{'methodName':'aria2.addUri',
     ...                                   'params':[['http://example.org']]},
-    ...                                  {'methodName':'aria2.addTorrent',
-    ...                                   'params':[base64.b64encode(open('file.torrent').read())]}]]})
+    ...                                  {'methodName':'aria2.addUri',
+    ...                                   'params':[['http://example.org/file2']]}]]})
     >>> c = urllib2.urlopen('http://localhost:6800/jsonrpc', jsonreq)
     >>> pprint(json.loads(c.read()))
     {u'id': u'qwer', u'jsonrpc': u'2.0', u'result': [[u'2089b05ecca3d829'], [u'd2703803b52216d1']]}
@@ -3586,8 +2951,8 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     ...                        'method':'aria2.addUri',
     ...                        'params':[['http://example.org']]},
     ...                       {'jsonrpc':'2.0', 'id':'asdf',
-    ...                        'method':'aria2.addTorrent',
-    ...                        'params':[base64.b64encode(open('file.torrent').read())]}])
+    ...                        'method':'aria2.addUri',
+    ...                        'params':[['http://example.org/file2']]}])
     >>> c = urllib2.urlopen('http://localhost:6800/jsonrpc', jsonreq)
     >>> pprint(json.loads(c.read()))
     [{u'id': u'qwer', u'jsonrpc': u'2.0', u'result': u'2089b05ecca3d829'},
@@ -3600,7 +2965,7 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
     >>> mc = xmlrpclib.MultiCall(s)
     >>> mc.aria2.addUri(['http://example.org/file'])
-    >>> mc.aria2.addTorrent(xmlrpclib.Binary(open('file.torrent', mode='rb').read()))
+    >>> mc.aria2.addUri(['http://example.org/file2'])
     >>> r = mc()
     >>> tuple(r)
     ('2089b05ecca3d829', 'd2703803b52216d1')
@@ -3624,7 +2989,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     {u'id': u'qwer',
      u'jsonrpc': u'2.0',
      u'result': [u'aria2.addUri',
-                 u'aria2.addTorrent',
     ...
 
   **XML-RPC Example**
@@ -3633,7 +2997,7 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     >>> import xmlrpclib
     >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
     >>> s.system.listMethods()
-    ['aria2.addUri', 'aria2.addTorrent', ...
+    ['aria2.addUri', 'aria2.addMetalink', ...
 
 .. function:: system.listNotifications()
 
@@ -3708,8 +3072,8 @@ XML-RPC Example
   </struct>
 
 
-The :option:`header <--header>` and :option:`index-out <-O>`
-options are allowed multiple times on the command-line. Since the name should be
+The :option:`header <--header>` option is allowed multiple times on
+the command-line. Since the name should be
 unique in a struct (many XML-RPC library implementations use a hash or dict for
 struct), a single string is not enough. To overcome this limitation, you may use
 an array as the value as well as a string.
@@ -3846,10 +3210,8 @@ notification method. Following notification methods are defined.
 .. function:: aria2.onDownloadComplete(event)
 
 
-  This notification will be sent when a download is complete.  For
-  BitTorrent downloads, this notification is sent when the download is
-  complete and seeding is over. The *event* is the same struct of the
-  *event* argument of
+  This notification will be sent when a download is complete.  The
+  *event* is the same struct of the *event* argument of
   :func:`aria2.onDownloadStart` method.
 
 
@@ -3858,14 +3220,6 @@ notification method. Following notification methods are defined.
 
   This notification will be sent when a download is stopped due to an error.
   The *event* is the same struct as the *event* argument of
-  :func:`aria2.onDownloadStart` method.
-
-
-.. function:: aria2.onBtDownloadComplete(event)
-
-
-  This notification will be sent when a torrent download is complete but seeding
-  is still going on.  The *event* is the same struct as the *event* argument of
   :func:`aria2.onDownloadStart` method.
 
 Sample XML-RPC Client Code
@@ -3922,14 +3276,8 @@ This section describes what these numbers and strings mean.
   Completed length, the total file length and its progress. If
   :option:`--select-file` is used, this is the sum of selected files.
 
-``SEED``
-  Share ratio when the aria2 is seeding a finished torrent.
-
 ``CN``
   The number of connections aria2 has established.
-
-``SD``
-  The number of seeders aria2 is connected to.
 
 ``DL``
   Download speed (bytes per second).
@@ -4089,161 +3437,6 @@ Download a file using a local metalink file with user preference
 
   $ aria2c --metalink-location=jp,us --metalink-version=1.1 --metalink-language=en-US file.metalink
 
-
-BitTorrent Download
-~~~~~~~~~~~~~~~~~~~
-Download files using a remote BitTorrent file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --follow-torrent=mem "http://host/file.torrent"
-
-
-Download using a local torrent file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --max-upload-limit=40K file.torrent
-
-.. note::
-
-  --max-upload-limit specifies the max of upload rate.
-
-.. note::
-
-  To stop a download, press :kbd:`Ctrl-C`. You can resume the transfer later by
-  running aria2c with the same argument in the same directory.
-
-Download using BitTorrent Magnet URI
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c "magnet:?xt=urn:btih:248D0A1CD08284299DE78D5C1ED359BB46717D8C&dn=aria2"
-
-
-.. note::
-
-  Don't forget to quote BitTorrent Magnet URIs which include ``&``
-  characters with single(``'``) or double(``"``) quotes when specifying URIs on
-  the command-line.
-
-Download 2 torrents
-^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c -j2 file1.torrent file2.torrent
-
-
-Download a file via torrent and HTTP/FTP server in parallel
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c -Ttest.torrent "http://host1/file" "ftp://host2/file"
-
-Only download specific files (usually called "selected download")
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --select-file=1-4,8 file.torrent
-
-.. note::
-
-  The index is printed to the console using -S option.
-
-Download a .torrent file, but do not download the torrent
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --follow-torrent=false "http://host/file.torrent"
-
-Specify the output file name
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-To specify the output file name for BitTorrent downloads, you need to know
-the index of file in the torrent (see :option:`--show-files <-S>`). For
-example, the output looks like this:
-
-.. code-block:: text
-
-  idx|path/length
-  ===+======================
-    1|dist/base-2.6.18.iso
-     |99.9MiB
-  ---+----------------------
-    2|dist/driver-2.6.18.iso
-     |169.0MiB
-  ---+----------------------
-
-
-To save 'dist/base-2.6.18.iso' in '/tmp/mydir/base.iso' and
-'dist/driver-2.6.18.iso' in '/tmp/dir/driver.iso', use the following
-command:
-
-.. code-block:: console
-
-  $ aria2c --dir=/tmp --index-out=1=mydir/base.iso --index-out=2=dir/driver.iso file.torrent
-
-
-Change the listening ports for incoming peer connections
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --listen-port=7000-7001,8000 file.torrent
-
-.. note::
-
-  Since aria2 doesn't configure firewalls or routers for port forwarding, it's
-  up to you to do so manually.
-
-Specify conditions to stop seeding after torrent downloads finish
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --seed-time=120 --seed-ratio=1.0 file.torrent
-
-.. note::
-
-  In the above example, the program stops seeding after 120 minutes since
-  download completed or seed ratio reaches 1.0.
-
-Throttle upload speed
-^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --max-upload-limit=100K file.torrent
-
-Enable IPv4 DHT
-^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --enable-dht --dht-listen-port=6881 file.torrent
-
-.. note::
-
-  DHT uses UDP. Since aria2 doesn't configure firewalls or routers for port
-  forwarding, it's up to you to do it manually.
-
-Enable IPv6 DHT
-^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --enable-dht6 --dht-listen-port=6881 --dht-listen-addr6=YOUR_GLOBAL_UNICAST_IPV6_ADDR
-
-.. note::
-
-  aria2 uses the same ports as IPv4 for IPv6.
-
-Add and remove tracker URIs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Ignore all tracker announce URIs defined in file.torrent and use
-``http://tracker1/announce`` and ``http://tracker2/announce`` instead:
-
-.. code-block:: console
-
-  $ aria2c --bt-exclude-tracker="*" --bt-tracker="http://tracker1/announce,http://tracker2/announce" file.torrent
-
-
 More advanced HTTP features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Load cookies
@@ -4355,7 +3548,7 @@ Repair a damaged download
 .. note::
 
   Repairing damaged downloads can be done efficiently when used with
-  BitTorrent or Metalink with chunk checksums.
+  Metalink files with chunk checksums.
 
 Drop connections if download speed is lower than a specified limit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -4399,21 +3592,11 @@ Verifying checksums
   $ aria2c --checksum=sha-1=0192ba11326fe2298c8cb4de616f4d4140213837 http://example.org/file
 
 
-Parallel downloads of an arbitrary number of URIs, metalink, torrent
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Parallel downloads of an arbitrary number of URIs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: console
 
-  $ aria2c -j3 -Z "http://host/file1" file2.torrent file3.metalink
-
-
-BitTorrent Encryption
-^^^^^^^^^^^^^^^^^^^^^
-Encrypt the whole payload using ARC4 (obfuscation):
-
-.. code-block:: console
-
-  $ aria2c --bt-min-crypto-level=arc4 --bt-require-crypto=true file.torrent
-
+  $ aria2c -j3 -Z "http://host/file1" "http://host/file2" "http://host/file3"
 
 SEE ALSO
 --------

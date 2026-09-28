@@ -52,7 +52,7 @@ enum StructElementType {
 };
 
 // Interface for streaming parser of structured data format (e.g.,
-// JSON, Bencode).
+// JSON).
 class StructParserStateMachine {
 public:
   virtual ~StructParserStateMachine() = default;

@@ -156,16 +156,6 @@ public:
   virtual std::string createPossibleValuesString() const CXX11_OVERRIDE;
 };
 
-class IndexOutOptionHandler : public AbstractOptionHandler {
-public:
-  IndexOutOptionHandler(PrefPtr pref, const char* description,
-                        char shortName = 0);
-  virtual ~IndexOutOptionHandler();
-  virtual void parseArg(Option& option,
-                        const std::string& optarg) const CXX11_OVERRIDE;
-  virtual std::string createPossibleValuesString() const CXX11_OVERRIDE;
-};
-
 class ChecksumOptionHandler : public AbstractOptionHandler {
 public:
   ChecksumOptionHandler(PrefPtr pref, const char* description,

@@ -57,7 +57,7 @@ void RpcHelperTest::testParseMemory()
       "             <value><i4>65535</i4></value>"
       "           </member>"
       "           <member>"
-      "             <name>seed-ratio</name>"
+      "             <name>split</name>"
       "             <value><double>0.99</double></value>"
       "           </member>"
       "         </struct>"
@@ -86,7 +86,7 @@ void RpcHelperTest::testParseMemory()
                        downcast<Integer>(dict->get("max-count"))->i());
   // Current implementation handles double as string.
   CPPUNIT_ASSERT_EQUAL(std::string("0.99"),
-                       downcast<String>(dict->get("seed-ratio"))->s());
+                       downcast<String>(dict->get("split"))->s());
   const List* list = downcast<List>(req.params->get(2));
   CPPUNIT_ASSERT_EQUAL(std::string("pudding"),
                        downcast<String>(list->get(0))->s());

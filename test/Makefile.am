@@ -73,6 +73,7 @@ aria2c_SOURCES = AllTest.cc\
 	UriTest.cc\
 	UriSplitTest.cc\
 	MockSegment.h\
+	MockPieceStorage.h\
 	CookieHelperTest.cc\
 	JsonTest.cc\
 	ValueBaseJsonParserTest.cc\
@@ -117,108 +118,6 @@ aria2c_SOURCES += MessageDigestHelperTest.cc\
 	IteratableChecksumValidatorTest.cc\
 	MessageDigestTest.cc
 
-if ENABLE_BITTORRENT
-aria2c_SOURCES += BtAllowedFastMessageTest.cc\
-	BtBitfieldMessageTest.cc\
-	BtCancelMessageTest.cc\
-	BtChokeMessageTest.cc\
-	BtHandshakeMessageTest.cc\
-	BtHaveAllMessageTest.cc\
-	BtHaveMessageTest.cc\
-	BtHaveNoneMessageTest.cc\
-	BtInterestedMessageTest.cc\
-	BtKeepAliveMessageTest.cc\
-	BtNotInterestedMessageTest.cc\
-	BtPieceMessageTest.cc\
-	BtPortMessageTest.cc\
-	BtRejectMessageTest.cc\
-	BtRequestMessageTest.cc\
-	BtSuggestPieceMessageTest.cc\
-	BtUnchokeMessageTest.cc\
-	DefaultPieceStorageTest.cc\
-	DefaultBtAnnounceTest.cc\
-	DefaultBtMessageDispatcherTest.cc\
-	DefaultBtRequestFactoryTest.cc\
-	MockBtMessage.h\
-	MockBtMessageDispatcher.h\
-	MockBtMessageFactory.h\
-	AnnounceListTest.cc\
-	DefaultPeerStorageTest.cc\
-	MockPeerStorage.h\
-	ByteArrayDiskWriterTest.cc\
-	PeerTest.cc\
-	PeerSessionResourceTest.cc\
-	ShareRatioSeedCriteriaTest.cc\
-	BtRegistryTest.cc\
-	BtDependencyTest.cc\
-	BtPostDownloadHandlerTest.cc\
-	TimeSeedCriteriaTest.cc\
-	BtExtendedMessageTest.cc\
-	HandshakeExtensionMessageTest.cc\
-	UTPexExtensionMessageTest.cc\
-	UTMetadataRequestExtensionMessageTest.cc\
-	UTMetadataDataExtensionMessageTest.cc\
-	UTMetadataRejectExtensionMessageTest.cc\
-	UTMetadataRequestTrackerTest.cc\
-	UTMetadataRequestFactoryTest.cc\
-	UTMetadataPostDownloadHandlerTest.cc\
-	MagnetTest.cc\
-	DefaultBtMessageFactoryTest.cc\
-	DefaultExtensionMessageFactoryTest.cc\
-	DHTNodeTest.cc\
-	DHTBucketTest.cc\
-	DHTRoutingTableTest.cc\
-	DHTMessageTrackerEntryTest.cc\
-	DHTMessageTrackerTest.cc\
-	DHTConnectionImplTest.cc\
-	DHTPingMessageTest.cc\
-	DHTPingReplyMessageTest.cc\
-	DHTFindNodeMessageTest.cc\
-	DHTFindNodeReplyMessageTest.cc\
-	DHTGetPeersMessageTest.cc\
-	DHTGetPeersReplyMessageTest.cc\
-	DHTAnnouncePeerMessageTest.cc\
-	DHTAnnouncePeerReplyMessageTest.cc\
-	DHTUnknownMessageTest.cc\
-	DHTMessageFactoryImplTest.cc\
-	DHTBucketTreeTest.cc\
-	DHTPeerAnnounceEntryTest.cc\
-	DHTPeerAnnounceStorageTest.cc\
-	DHTTokenTrackerTest.cc\
-	XORCloserTest.cc\
-	DHTIDCloserTest.cc\
-	DHTRoutingTableSerializerTest.cc\
-	DHTRoutingTableDeserializerTest.cc\
-	DHTTaskExecutorTest.cc\
-	DHKeyExchangeTest.cc\
-	ARC4Test.cc\
-	MSEHandshakeTest.cc\
-	MockBtAnnounce.h\
-	MockBtProgressInfoFile.h\
-	MockBtRequestFactory.h\
-	MockDHTMessage.h\
-	MockDHTMessageCallback.h\
-	MockDHTMessageDispatcher.h\
-	MockDHTMessageFactory.h\
-	MockDHTTask.h\
-	MockDHTTaskFactory.h\
-	MockDHTTaskQueue.h\
-	MockExtensionMessage.h\
-	MockExtensionMessageFactory.h\
-	MockPieceStorage.h\
-	BittorrentHelperTest.cc\
-	PriorityPieceSelectorTest.cc\
-	MockPieceSelector.h\
-	extension_message_test_helper.h\
-	LpdMessageDispatcherTest.cc\
-	LpdMessageReceiverTest.cc\
-	Bencode2Test.cc\
-	PeerConnectionTest.cc\
-	ValueBaseBencodeParserTest.cc\
-	ExtensionMessageRegistryTest.cc\
-	UDPTrackerClientTest.cc
-endif # ENABLE_BITTORRENT
-
 if ENABLE_METALINK
 aria2c_SOURCES += MetalinkerTest.cc\
 	MetalinkEntryTest.cc\
@@ -254,7 +153,6 @@ aria2c_LDADD = \
 	@LIBGNUTLS_LIBS@ \
 	@OPENSSL_LIBS@ \
 	@LIBNETTLE_LIBS@ \
-	@LIBGMP_LIBS@ \
 	@LIBGCRYPT_LIBS@ \
 	@LIBSSH2_LIBS@ \
 	@LIBCARES_LIBS@ \
@@ -281,7 +179,6 @@ AM_CPPFLAGS = \
 	@LIBGNUTLS_CFLAGS@ \
 	@OPENSSL_CFLAGS@ \
 	@LIBNETTLE_CFLAGS@ \
-	@LIBGMP_CFLAGS@ \
 	@LIBGCRYPT_CFLAGS@ \
 	@LIBSSH2_CFLAGS@ \
 	@LIBCARES_CFLAGS@ \
@@ -315,15 +212,9 @@ EXTRA_DIST = 4096chunk.txt\
 	malformed.netrc\
 	nscookietest.txt\
 	sample.netrc\
-	single.torrent\
-	test.torrent\
 	test.xml\
-	url-list-multiFile.torrent\
-	url-list-singleFile.torrent\
-	url-list-singleFileEndsWithSlash.torrent\
 	input_uris.txt\
 	2files.metalink\
-	utf8.torrent\
 	metalink4.xml\
 	metalink3-dirtraversal.xml\
 	metalink4-groupbymetaurl.xml\

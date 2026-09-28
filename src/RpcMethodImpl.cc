@@ -69,14 +69,6 @@
 #include "MessageDigest.h"
 #include "message_digest_helper.h"
 #include "OpenedFileCounter.h"
-#ifdef ENABLE_BITTORRENT
-#  include "bittorrent_helper.h"
-#  include "BtRegistry.h"
-#  include "PeerStorage.h"
-#  include "Peer.h"
-#  include "BtRuntime.h"
-#  include "BtAnnounce.h"
-#endif // ENABLE_BITTORRENT
 #include "CheckIntegrityEntry.h"
 
 namespace aria2 {
@@ -111,14 +103,6 @@ const char KEY_NUM_PIECES[] = "numPieces";
 const char KEY_FOLLOWED_BY[] = "followedBy";
 const char KEY_FOLLOWING[] = "following";
 const char KEY_BELONGS_TO[] = "belongsTo";
-const char KEY_INFO_HASH[] = "infoHash";
-const char KEY_NUM_SEEDERS[] = "numSeeders";
-const char KEY_PEER_ID[] = "peerId";
-const char KEY_IP[] = "ip";
-const char KEY_PORT[] = "port";
-const char KEY_AM_CHOKING[] = "amChoking";
-const char KEY_PEER_CHOKING[] = "peerChoking";
-const char KEY_SEEDER[] = "seeder";
 const char KEY_INDEX[] = "index";
 const char KEY_PATH[] = "path";
 const char KEY_SELECTED[] = "selected";
@@ -133,13 +117,6 @@ const char KEY_SESSION_ID[] = "sessionId";
 const char KEY_FILES[] = "files";
 const char KEY_DIR[] = "dir";
 const char KEY_URIS[] = "uris";
-const char KEY_BITTORRENT[] = "bittorrent";
-const char KEY_INFO[] = "info";
-const char KEY_NAME[] = "name";
-const char KEY_ANNOUNCE_LIST[] = "announceList";
-const char KEY_COMMENT[] = "comment";
-const char KEY_CREATION_DATE[] = "creationDate";
-const char KEY_MODE[] = "mode";
 const char KEY_SERVERS[] = "servers";
 const char KEY_NUM_WAITING[] = "numWaiting";
 const char KEY_NUM_STOPPED[] = "numStopped";
@@ -266,61 +243,6 @@ std::string getHexSha1(const std::string& s)
   return util::toHex(hash, sizeof(hash));
 }
 } // namespace
-
-#ifdef ENABLE_BITTORRENT
-std::unique_ptr<ValueBase> AddTorrentRpcMethod::process(const RpcRequest& req,
-                                                        DownloadEngine* e)
-{
-  const String* torrentParam = checkRequiredParam<String>(req, 0);
-  const List* urisParam = checkParam<List>(req, 1);
-  const Dict* optsParam = checkParam<Dict>(req, 2);
-  const Integer* posParam = checkParam<Integer>(req, 3);
-
-  std::unique_ptr<String> tempTorrentParam;
-  if (req.jsonRpc) {
-    tempTorrentParam = String::g(
-        base64::decode(torrentParam->s().begin(), torrentParam->s().end()));
-    torrentParam = tempTorrentParam.get();
-  }
-  std::vector<std::string> uris;
-  extractUris(std::back_inserter(uris), urisParam);
-
-  auto requestOption = std::make_shared<Option>(*e->getOption());
-  gatherRequestOption(requestOption.get(), optsParam);
-
-  bool posGiven = checkPosParam(posParam);
-  size_t pos = posGiven ? posParam->i() : 0;
-
-  std::string filename;
-  if (requestOption->getAsBool(PREF_RPC_SAVE_UPLOAD_METADATA)) {
-    filename = util::applyDir(requestOption->get(PREF_DIR),
-                              getHexSha1(torrentParam->s()) + ".torrent");
-    // Save uploaded data in order to save this download in
-    // --save-session file.
-    if (util::saveAs(filename, torrentParam->s(), true)) {
-      A2_LOG_INFO(
-          fmt("Uploaded torrent data was saved as %s", filename.c_str()));
-      requestOption->put(PREF_TORRENT_FILE, filename);
-    }
-    else {
-      A2_LOG_INFO(fmt("Uploaded torrent data was not saved."
-                      " Failed to write file %s",
-                      filename.c_str()));
-      filename.clear();
-    }
-  }
-  std::vector<std::shared_ptr<RequestGroup>> result;
-  createRequestGroupForBitTorrent(result, requestOption, uris, filename,
-                                  torrentParam->s());
-
-  if (!result.empty()) {
-    return addRequestGroup(result.front(), e, posGiven, pos);
-  }
-  else {
-    throw DL_ABORT_EX("No Torrent to download.");
-  }
-}
-#endif // ENABLE_BITTORRENT
 
 #ifdef ENABLE_METALINK
 std::unique_ptr<ValueBase> AddMetalinkRpcMethod::process(const RpcRequest& req,
@@ -690,113 +612,11 @@ void gatherProgressCommon(Dict* entryDict,
   }
 }
 
-#ifdef ENABLE_BITTORRENT
-void gatherBitTorrentMetadata(Dict* btDict, TorrentAttribute* torrentAttrs)
-{
-  if (!torrentAttrs->comment.empty()) {
-    btDict->put(KEY_COMMENT, torrentAttrs->comment);
-  }
-  if (torrentAttrs->creationDate) {
-    btDict->put(KEY_CREATION_DATE, Integer::g(torrentAttrs->creationDate));
-  }
-  if (torrentAttrs->mode) {
-    btDict->put(KEY_MODE, bittorrent::getModeString(torrentAttrs->mode));
-  }
-  auto destAnnounceList = List::g();
-  for (auto& annlist : torrentAttrs->announceList) {
-    auto destAnnounceTier = List::g();
-    for (auto& ann : annlist) {
-      destAnnounceTier->append(ann);
-    }
-    destAnnounceList->append(std::move(destAnnounceTier));
-  }
-  btDict->put(KEY_ANNOUNCE_LIST, std::move(destAnnounceList));
-  if (!torrentAttrs->metadata.empty()) {
-    auto infoDict = Dict::g();
-    infoDict->put(KEY_NAME, torrentAttrs->name);
-    btDict->put(KEY_INFO, std::move(infoDict));
-  }
-}
-
-namespace {
-void gatherProgressBitTorrent(Dict* entryDict,
-                              const std::shared_ptr<RequestGroup>& group,
-                              TorrentAttribute* torrentAttrs,
-                              BtObject* btObject,
-                              const std::vector<std::string>& keys)
-{
-  if (requested_key(keys, KEY_INFO_HASH)) {
-    entryDict->put(KEY_INFO_HASH, util::toHex(torrentAttrs->infoHash));
-  }
-  if (requested_key(keys, KEY_BITTORRENT)) {
-    auto btDict = Dict::g();
-    gatherBitTorrentMetadata(btDict.get(), torrentAttrs);
-    entryDict->put(KEY_BITTORRENT, std::move(btDict));
-  }
-  if (requested_key(keys, KEY_NUM_SEEDERS)) {
-    if (!btObject) {
-      entryDict->put(KEY_NUM_SEEDERS, VLB_ZERO);
-    }
-    else {
-      auto& peerStorage = btObject->peerStorage;
-      assert(peerStorage);
-      auto& peers = peerStorage->getUsedPeers();
-      entryDict->put(KEY_NUM_SEEDERS,
-                     util::uitos(countSeeder(peers.begin(), peers.end())));
-    }
-  }
-  if (requested_key(keys, KEY_SEEDER)) {
-    entryDict->put(KEY_SEEDER, group->isSeeder() ? VLB_TRUE : VLB_FALSE);
-  }
-}
-} // namespace
-
-namespace {
-void gatherPeer(List* peers, const std::shared_ptr<PeerStorage>& ps)
-{
-  auto& usedPeers = ps->getUsedPeers();
-  for (auto& peer : usedPeers) {
-    if (!peer->isActive()) {
-      continue;
-    }
-    auto peerEntry = Dict::g();
-    peerEntry->put(KEY_PEER_ID, util::torrentPercentEncode(peer->getPeerId(),
-                                                           PEER_ID_LENGTH));
-    peerEntry->put(KEY_IP, peer->getIPAddress());
-    if (peer->isIncomingPeer()) {
-      peerEntry->put(KEY_PORT, VLB_ZERO);
-    }
-    else {
-      peerEntry->put(KEY_PORT, util::uitos(peer->getPort()));
-    }
-    peerEntry->put(KEY_BITFIELD,
-                   util::toHex(peer->getBitfield(), peer->getBitfieldLength()));
-    peerEntry->put(KEY_AM_CHOKING, peer->amChoking() ? VLB_TRUE : VLB_FALSE);
-    peerEntry->put(KEY_PEER_CHOKING,
-                   peer->peerChoking() ? VLB_TRUE : VLB_FALSE);
-    peerEntry->put(KEY_DOWNLOAD_SPEED,
-                   util::itos(peer->calculateDownloadSpeed()));
-    peerEntry->put(KEY_UPLOAD_SPEED, util::itos(peer->calculateUploadSpeed()));
-    peerEntry->put(KEY_SEEDER, peer->isSeeder() ? VLB_TRUE : VLB_FALSE);
-    peers->append(std::move(peerEntry));
-  }
-}
-} // namespace
-#endif // ENABLE_BITTORRENT
-
 namespace {
 void gatherProgress(Dict* entryDict, const std::shared_ptr<RequestGroup>& group,
                     DownloadEngine* e, const std::vector<std::string>& keys)
 {
   gatherProgressCommon(entryDict, group, keys);
-#ifdef ENABLE_BITTORRENT
-  if (group->getDownloadContext()->hasAttribute(CTX_ATTR_BT)) {
-    gatherProgressBitTorrent(
-        entryDict, group,
-        bittorrent::getTorrentAttrs(group->getDownloadContext()),
-        e->getBtRegistry()->get(group->getGID()), keys);
-  }
-#endif // ENABLE_BITTORRENT
   if (e->getCheckIntegrityMan()) {
     if (e->getCheckIntegrityMan()->isPicked(
             [&group](const CheckIntegrityEntry& ent) {
@@ -888,14 +708,6 @@ void gatherStoppedDownload(Dict* entryDict,
   if (requested_key(keys, KEY_UPLOAD_SPEED)) {
     entryDict->put(KEY_UPLOAD_SPEED, VLB_ZERO);
   }
-  if (!ds->infoHash.empty()) {
-    if (requested_key(keys, KEY_INFO_HASH)) {
-      entryDict->put(KEY_INFO_HASH, util::toHex(ds->infoHash));
-    }
-    if (requested_key(keys, KEY_NUM_SEEDERS)) {
-      entryDict->put(KEY_NUM_SEEDERS, VLB_ZERO);
-    }
-  }
   if (requested_key(keys, KEY_PIECE_LENGTH)) {
     entryDict->put(KEY_PIECE_LENGTH, util::itos(ds->pieceLength));
   }
@@ -909,17 +721,6 @@ void gatherStoppedDownload(Dict* entryDict,
     entryDict->put(KEY_DIR, ds->dir);
   }
 
-#ifdef ENABLE_BITTORRENT
-  if (ds->attrs.size() > CTX_ATTR_BT && ds->attrs[CTX_ATTR_BT]) {
-    const auto attrs =
-        static_cast<TorrentAttribute*>(ds->attrs[CTX_ATTR_BT].get());
-    if (requested_key(keys, KEY_BITTORRENT)) {
-      auto btDict = Dict::g();
-      gatherBitTorrentMetadata(btDict.get(), attrs);
-      entryDict->put(KEY_BITTORRENT, std::move(btDict));
-    }
-  }
-#endif // ENABLE_BITTORRENT
 }
 
 std::unique_ptr<ValueBase> GetFilesRpcMethod::process(const RpcRequest& req,
@@ -972,28 +773,6 @@ std::unique_ptr<ValueBase> GetUrisRpcMethod::process(const RpcRequest& req,
   }
   return std::move(uriList);
 }
-
-#ifdef ENABLE_BITTORRENT
-std::unique_ptr<ValueBase> GetPeersRpcMethod::process(const RpcRequest& req,
-                                                      DownloadEngine* e)
-{
-  const String* gidParam = checkRequiredParam<String>(req, 0);
-
-  a2_gid_t gid = str2Gid(gidParam);
-  auto group = e->getRequestGroupMan()->findGroup(gid);
-  if (!group) {
-    throw DL_ABORT_EX(fmt("No peer data is available for GID#%s",
-                          GroupId::toHex(gid).c_str()));
-  }
-  auto peers = List::g();
-  auto btObject = e->getBtRegistry()->get(group->getGID());
-  if (btObject) {
-    assert(btObject->peerStorage);
-    gatherPeer(peers.get(), btObject->peerStorage);
-  }
-  return std::move(peers);
-}
-#endif // ENABLE_BITTORRENT
 
 std::unique_ptr<ValueBase> TellStatusRpcMethod::process(const RpcRequest& req,
                                                         DownloadEngine* e)
@@ -1598,11 +1377,7 @@ void changeOption(const std::shared_ptr<RequestGroup>& group,
                                           fileEntry->getSuffixPath()));
       }
     }
-    else if (group->getMetadataInfo()
-#ifdef ENABLE_BITTORRENT
-             && !dctx->hasAttribute(CTX_ATTR_BT)
-#endif // ENABLE_BITTORRENT
-    ) {
+    else if (group->getMetadataInfo()) {
       // In case of Metalink
       for (auto& fileEntry : dctx->getFileEntries()) {
         // PREF_OUT is not applicable to Metalink.  We have always
@@ -1612,37 +1387,10 @@ void changeOption(const std::shared_ptr<RequestGroup>& group,
       }
     }
   }
-#ifdef ENABLE_BITTORRENT
-  if (option.defined(PREF_DIR) || option.defined(PREF_INDEX_OUT)) {
-    if (dctx->hasAttribute(CTX_ATTR_BT)) {
-      std::istringstream indexOutIn(grOption->get(PREF_INDEX_OUT));
-      std::vector<std::pair<size_t, std::string>> indexPaths =
-          util::createIndexPaths(indexOutIn);
-      for (std::vector<std::pair<size_t, std::string>>::const_iterator
-               i = indexPaths.begin(),
-               eoi = indexPaths.end();
-           i != eoi; ++i) {
-        dctx->setFilePathWithIndex(
-            (*i).first, util::applyDir(grOption->get(PREF_DIR), (*i).second));
-      }
-    }
-  }
-#endif // ENABLE_BITTORRENT
   if (option.defined(PREF_MAX_DOWNLOAD_LIMIT)) {
     group->setMaxDownloadSpeedLimit(
         grOption->getAsInt(PREF_MAX_DOWNLOAD_LIMIT));
   }
-  if (option.defined(PREF_MAX_UPLOAD_LIMIT)) {
-    group->setMaxUploadSpeedLimit(grOption->getAsInt(PREF_MAX_UPLOAD_LIMIT));
-  }
-#ifdef ENABLE_BITTORRENT
-  auto btObject = e->getBtRegistry()->get(group->getGID());
-  if (btObject) {
-    if (option.defined(PREF_BT_MAX_PEERS)) {
-      btObject->btRuntime->setMaxPeers(grOption->getAsInt(PREF_BT_MAX_PEERS));
-    }
-  }
-#endif // ENABLE_BITTORRENT
 }
 
 void changeGlobalOption(const Option& option, DownloadEngine* e)
@@ -1651,10 +1399,6 @@ void changeGlobalOption(const Option& option, DownloadEngine* e)
   if (option.defined(PREF_MAX_OVERALL_DOWNLOAD_LIMIT)) {
     e->getRequestGroupMan()->setMaxOverallDownloadSpeedLimit(
         option.getAsInt(PREF_MAX_OVERALL_DOWNLOAD_LIMIT));
-  }
-  if (option.defined(PREF_MAX_OVERALL_UPLOAD_LIMIT)) {
-    e->getRequestGroupMan()->setMaxOverallUploadSpeedLimit(
-        option.getAsInt(PREF_MAX_OVERALL_UPLOAD_LIMIT));
   }
   if (option.defined(PREF_MAX_CONCURRENT_DOWNLOADS)) {
     e->getRequestGroupMan()->setMaxConcurrentDownloads(
@@ -1680,10 +1424,6 @@ void changeGlobalOption(const Option& option, DownloadEngine* e)
     catch (RecoverableException& e) {
       // TODO no exception handling
     }
-  }
-  if (option.defined(PREF_BT_MAX_OPEN_FILES)) {
-    auto& openedFileCounter = e->getRequestGroupMan()->getOpenedFileCounter();
-    openedFileCounter->setMaxOpenFiles(option.getAsInt(PREF_BT_MAX_OPEN_FILES));
   }
 }
 

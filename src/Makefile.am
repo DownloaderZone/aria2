@@ -52,7 +52,6 @@ SRCS =  \
 	ConsoleStatCalc.cc ConsoleStatCalc.h\
 	ContentTypeRequestGroupCriteria.cc ContentTypeRequestGroupCriteria.h\
 	Context.cc Context.h\
-	ContextAttribute.cc ContextAttribute.h\
 	ControlChain.h\
 	Cookie.cc Cookie.h\
 	CookieStorage.cc CookieStorage.h\
@@ -243,7 +242,6 @@ SRCS =  \
 	TimedHaltCommand.cc TimedHaltCommand.h\
 	TimerA2.cc TimerA2.h\
 	timespec.h\
-	TorrentAttribute.cc TorrentAttribute.h\
 	TransferStat.cc TransferStat.h\
 	TruncFileAllocationIterator.cc TruncFileAllocationIterator.h\
 	UnknownLengthPieceStorage.cc UnknownLengthPieceStorage.h\
@@ -341,16 +339,6 @@ SRCS += \
 	WinTLSSession.cc WinTLSSession.h
 endif # HAVE_WINTLS
 
-if USE_INTERNAL_BIGNUM
-SRCS += \
-	bignum.h\
-	InternalDHKeyExchange.cc InternalDHKeyExchange.h
-endif
-
-if USE_INTERNAL_ARC4
-SRCS += InternalARC4Encryptor.cc InternalARC4Encryptor.h
-endif
-
 if USE_INTERNAL_MD
 SRCS += \
 	InternalMessageDigestImpl.cc\
@@ -363,32 +351,15 @@ SRCS += \
         LibgnutlsTLSSession.cc LibgnutlsTLSSession.h
 endif # HAVE_LIBGNUTLS
 
-if HAVE_LIBGCRYPT
-SRCS += \
-	LibgcryptARC4Encryptor.cc LibgcryptARC4Encryptor.h \
-        LibgcryptDHKeyExchange.cc LibgcryptDHKeyExchange.h
 if USE_LIBGCRYPT_MD
 SRCS += LibgcryptMessageDigestImpl.cc
 endif # USE_LIBGCRYPT_MD
-endif # HAVE_LIBGCRYPT
 
-if HAVE_LIBNETTLE
-SRCS += LibnettleARC4Encryptor.cc LibnettleARC4Encryptor.h
 if USE_LIBNETTLE_MD
 SRCS += LibnettleMessageDigestImpl.cc
 endif # USE_LIBNETTLE_MD
-endif # HAVE_LIBNETTLE
-
-if HAVE_LIBGMP
-SRCS += \
-	a2gmp.cc a2gmp.h \
-        LibgmpDHKeyExchange.cc LibgmpDHKeyExchange.h
-endif # HAVE_LIBGMP
 
 if HAVE_OPENSSL
-SRCS += \
-	LibsslARC4Encryptor.cc LibsslARC4Encryptor.h \
-        LibsslDHKeyExchange.cc LibsslDHKeyExchange.h
 if !HAVE_APPLETLS
 SRCS += \
 	LibsslTLSContext.cc LibsslTLSContext.h \
@@ -426,186 +397,6 @@ SRCS += \
 	AsyncNameResolver.cc AsyncNameResolver.h\
 	AsyncNameResolverMan.cc AsyncNameResolverMan.h
 endif # ENABLE_ASYNC_DNS
-
-if ENABLE_BITTORRENT
-SRCS += \
-	AbstractBtMessage.cc AbstractBtMessage.h\
-	ActivePeerConnectionCommand.cc ActivePeerConnectionCommand.h\
-	AnnounceList.h AnnounceList.cc\
-	AnnounceTier.cc AnnounceTier.h\
-	ARC4Encryptor.h\
-	bencode2.cc bencode2.h\
-	BencodeDiskWriter.h\
-	BencodeDiskWriterFactory.h\
-	BencodeParser.cc BencodeParser.h\
-	bittorrent_helper.cc bittorrent_helper.h\
-	BtAbortOutstandingRequestEvent.cc BtAbortOutstandingRequestEvent.h\
-	BtAllowedFastMessage.cc BtAllowedFastMessage.h\
-	BtAnnounce.cc BtAnnounce.h\
-	BtBitfieldMessage.cc BtBitfieldMessage.h\
-	BtBitfieldMessageValidator.cc BtBitfieldMessageValidator.h\
-	BtCancelMessage.cc BtCancelMessage.h\
-	BtCancelSendingPieceEvent.h\
-	BtCheckIntegrityEntry.cc BtCheckIntegrityEntry.h\
-	BtChokeMessage.cc BtChokeMessage.h\
-	BtChokingEvent.h\
-	BtConstants.h\
-	BtDependency.cc BtDependency.h\
-	BtExtendedMessage.cc BtExtendedMessage.h\
-	BtFileAllocationEntry.cc BtFileAllocationEntry.h\
-	BtHandshakeMessage.cc BtHandshakeMessage.h\
-	BtHandshakeMessageValidator.cc BtHandshakeMessageValidator.h\
-	BtHaveAllMessage.cc BtHaveAllMessage.h\
-	BtHaveMessage.cc BtHaveMessage.h\
-	BtHaveNoneMessage.cc BtHaveNoneMessage.h\
-	BtInteractive.h\
-	BtInterestedMessage.cc BtInterestedMessage.h\
-	BtKeepAliveMessage.cc BtKeepAliveMessage.h\
-	BtLeecherStateChoke.cc BtLeecherStateChoke.h\
-	BtMessage.h\
-	BtMessageDispatcher.h\
-	BtMessageFactory.h\
-	BtMessageReceiver.h\
-	BtMessageValidator.h\
-	BtNotInterestedMessage.cc BtNotInterestedMessage.h\
-	BtPieceMessage.cc BtPieceMessage.h\
-	BtPieceMessageValidator.cc BtPieceMessageValidator.h\
-	BtPortMessage.cc BtPortMessage.h\
-	BtPostDownloadHandler.cc BtPostDownloadHandler.h\
-	BtRegistry.cc BtRegistry.h\
-	BtRejectMessage.cc BtRejectMessage.h\
-	BtRequestFactory.h\
-	BtRequestMessage.cc BtRequestMessage.h\
-	BtRuntime.cc BtRuntime.h\
-	BtSeederStateChoke.cc BtSeederStateChoke.h\
-	BtSetup.cc BtSetup.h\
-	BtStopDownloadCommand.cc BtStopDownloadCommand.h\
-	BtSuggestPieceMessage.cc BtSuggestPieceMessage.h\
-	BtUnchokeMessage.cc BtUnchokeMessage.h\
-	DefaultBtAnnounce.cc DefaultBtAnnounce.h\
-	DefaultBtInteractive.cc DefaultBtInteractive.h\
-	DefaultBtMessageDispatcher.cc DefaultBtMessageDispatcher.h\
-	DefaultBtMessageFactory.cc DefaultBtMessageFactory.h\
-	DefaultBtMessageReceiver.cc DefaultBtMessageReceiver.h\
-	DefaultBtRequestFactory.cc DefaultBtRequestFactory.h\
-	DefaultExtensionMessageFactory.cc DefaultExtensionMessageFactory.h\
-	DefaultPeerStorage.cc DefaultPeerStorage.h\
-	DHKeyExchange.h\
-	DHTAbstractMessage.cc DHTAbstractMessage.h\
-	DHTAbstractNodeLookupTask.h\
-	DHTAbstractTask.cc DHTAbstractTask.h\
-	DHTAnnouncePeerMessage.cc DHTAnnouncePeerMessage.h\
-	DHTAnnouncePeerReplyMessage.cc DHTAnnouncePeerReplyMessage.h\
-	DHTAutoSaveCommand.cc DHTAutoSaveCommand.h\
-	DHTBucket.cc DHTBucket.h\
-	DHTBucketRefreshCommand.cc DHTBucketRefreshCommand.h\
-	DHTBucketRefreshTask.cc DHTBucketRefreshTask.h\
-	DHTBucketTree.cc DHTBucketTree.h\
-	DHTConnection.h\
-	DHTConnectionImpl.cc DHTConnectionImpl.h\
-	DHTConstants.h\
-	DHTEntryPointNameResolveCommand.cc DHTEntryPointNameResolveCommand.h\
-	DHTFindNodeMessage.cc DHTFindNodeMessage.h\
-	DHTFindNodeReplyMessage.cc DHTFindNodeReplyMessage.h\
-	DHTGetPeersCommand.cc DHTGetPeersCommand.h\
-	DHTGetPeersMessage.cc DHTGetPeersMessage.h\
-	DHTGetPeersReplyMessage.cc DHTGetPeersReplyMessage.h\
-	DHTIDCloser.h\
-	DHTInteractionCommand.cc DHTInteractionCommand.h\
-	DHTMessage.cc DHTMessage.h\
-	DHTMessageCallback.h\
-	DHTMessageDispatcher.h\
-	DHTMessageDispatcherImpl.cc DHTMessageDispatcherImpl.h\
-	DHTMessageEntry.cc DHTMessageEntry.h\
-	DHTMessageFactory.h\
-	DHTMessageFactoryImpl.cc DHTMessageFactoryImpl.h\
-	DHTMessageReceiver.cc DHTMessageReceiver.h\
-	DHTMessageTracker.cc DHTMessageTracker.h\
-	DHTMessageTrackerEntry.cc DHTMessageTrackerEntry.h\
-	DHTNode.cc DHTNode.h\
-	DHTNodeLookupEntry.cc DHTNodeLookupEntry.h\
-	DHTNodeLookupTask.cc DHTNodeLookupTask.h\
-	DHTNodeLookupTaskCallback.cc DHTNodeLookupTaskCallback.h\
-	DHTPeerAnnounceCommand.cc DHTPeerAnnounceCommand.h\
-	DHTPeerAnnounceEntry.cc DHTPeerAnnounceEntry.h\
-	DHTPeerAnnounceStorage.cc DHTPeerAnnounceStorage.h\
-	DHTPeerLookupTask.cc DHTPeerLookupTask.h\
-	DHTPeerLookupTaskCallback.cc DHTPeerLookupTaskCallback.h\
-	DHTPingMessage.cc DHTPingMessage.h\
-	DHTPingReplyMessage.cc DHTPingReplyMessage.h\
-	DHTPingReplyMessageCallback.h\
-	DHTPingTask.cc DHTPingTask.h\
-	DHTQueryMessage.cc DHTQueryMessage.h\
-	DHTRegistry.cc DHTRegistry.h\
-	DHTReplaceNodeTask.cc DHTReplaceNodeTask.h\
-	DHTResponseMessage.cc DHTResponseMessage.h\
-	DHTRoutingTable.cc DHTRoutingTable.h\
-	DHTRoutingTableDeserializer.cc DHTRoutingTableDeserializer.h\
-	DHTRoutingTableSerializer.cc DHTRoutingTableSerializer.h\
-	DHTSetup.cc DHTSetup.h\
-	DHTTask.h\
-	DHTTaskExecutor.cc DHTTaskExecutor.h\
-	DHTTaskFactory.h\
-	DHTTaskFactoryImpl.cc DHTTaskFactoryImpl.h\
-	DHTTaskQueue.h\
-	DHTTaskQueueImpl.cc DHTTaskQueueImpl.h\
-	DHTTokenTracker.cc DHTTokenTracker.h\
-	DHTTokenUpdateCommand.cc DHTTokenUpdateCommand.h\
-	DHTUnknownMessage.cc DHTUnknownMessage.h\
-	ExtensionMessage.h\
-	ExtensionMessageFactory.h\
-	ExtensionMessageRegistry.cc ExtensionMessageRegistry.h\
-	HandshakeExtensionMessage.cc HandshakeExtensionMessage.h\
-	IndexBtMessage.cc IndexBtMessage.h\
-	IndexBtMessageValidator.cc IndexBtMessageValidator.h\
-	InitiatorMSEHandshakeCommand.cc InitiatorMSEHandshakeCommand.h\
-	LpdDispatchMessageCommand.cc LpdDispatchMessageCommand.h\
-	LpdMessage.cc LpdMessage.h\
-	LpdMessageDispatcher.cc LpdMessageDispatcher.h\
-	LpdMessageReceiver.cc LpdMessageReceiver.h\
-	LpdReceiveMessageCommand.cc LpdReceiveMessageCommand.h\
-	magnet.cc magnet.h\
-	MemoryBencodePreDownloadHandler.h\
-	MSEHandshake.cc MSEHandshake.h\
-	NameResolveCommand.cc NameResolveCommand.h\
-	Peer.cc Peer.h\
-	PeerAbstractCommand.cc PeerAbstractCommand.h\
-	PeerAddrEntry.cc PeerAddrEntry.h\
-	PeerChokeCommand.cc PeerChokeCommand.h\
-	PeerConnection.cc PeerConnection.h\
-	PeerInitiateConnectionCommand.cc PeerInitiateConnectionCommand.h\
-	PeerInteractionCommand.cc PeerInteractionCommand.h\
-	PeerListenCommand.cc PeerListenCommand.h\
-	PeerReceiveHandshakeCommand.cc PeerReceiveHandshakeCommand.h\
-	PeerSessionResource.cc PeerSessionResource.h\
-	PeerStorage.h\
-	PriorityPieceSelector.cc PriorityPieceSelector.h\
-	RangeBtMessage.cc RangeBtMessage.h\
-	RangeBtMessageValidator.cc RangeBtMessageValidator.h\
-	ReceiverMSEHandshakeCommand.cc ReceiverMSEHandshakeCommand.h\
-	RequestSlot.cc RequestSlot.h\
-	SeedCheckCommand.cc SeedCheckCommand.h\
-	SeedCriteria.h\
-	ShareRatioSeedCriteria.cc ShareRatioSeedCriteria.h\
-	SimpleBtMessage.cc SimpleBtMessage.h\
-	TimeSeedCriteria.cc TimeSeedCriteria.h\
-	TrackerWatcherCommand.cc TrackerWatcherCommand.h\
-	UDPTrackerClient.cc UDPTrackerClient.h\
-	UDPTrackerRequest.cc UDPTrackerRequest.h\
-	UnionSeedCriteria.cc UnionSeedCriteria.h\
-	UTMetadataDataExtensionMessage.cc UTMetadataDataExtensionMessage.h\
-	UTMetadataExtensionMessage.cc UTMetadataExtensionMessage.h\
-	UTMetadataPostDownloadHandler.cc UTMetadataPostDownloadHandler.h\
-	UTMetadataRejectExtensionMessage.cc UTMetadataRejectExtensionMessage.h\
-	UTMetadataRequestExtensionMessage.cc\
-	UTMetadataRequestExtensionMessage.h\
-	UTMetadataRequestFactory.cc UTMetadataRequestFactory.h\
-	UTMetadataRequestTracker.cc UTMetadataRequestTracker.h\
-	UTPexExtensionMessage.cc UTPexExtensionMessage.h\
-	ValueBaseBencodeParser.h\
-	XORCloser.h\
-	ZeroBtMessage.cc ZeroBtMessage.h
-endif # ENABLE_BITTORRENT
 
 if ENABLE_METALINK
 SRCS += \
@@ -709,7 +500,6 @@ AM_CPPFLAGS = \
 	@LIBGNUTLS_CFLAGS@ \
 	@OPENSSL_CFLAGS@ \
 	@LIBNETTLE_CFLAGS@ \
-	@LIBGMP_CFLAGS@ \
 	@LIBGCRYPT_CFLAGS@ \
 	@LIBSSH2_CFLAGS@ \
 	@LIBCARES_CFLAGS@ \
@@ -732,7 +522,6 @@ EXTLDADD = @ALLOCA@ \
 	@LIBGNUTLS_LIBS@ \
 	@OPENSSL_LIBS@ \
 	@LIBNETTLE_LIBS@ \
-	@LIBGMP_LIBS@ \
 	@LIBGCRYPT_LIBS@ \
 	@LIBSSH2_LIBS@ \
 	@LIBCARES_LIBS@ \

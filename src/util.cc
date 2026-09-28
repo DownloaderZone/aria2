@@ -422,26 +422,6 @@ std::string percentEncodeMini(const std::string& src)
   return result;
 }
 
-std::string torrentPercentEncode(const unsigned char* target, size_t len)
-{
-  std::string dest;
-  for (size_t i = 0; i < len; ++i) {
-    if (isAlpha(target[i]) || isDigit(target[i])) {
-      dest += target[i];
-    }
-    else {
-      dest.append(fmt("%%%02X", target[i]));
-    }
-  }
-  return dest;
-}
-
-std::string torrentPercentEncode(const std::string& target)
-{
-  return torrentPercentEncode(
-      reinterpret_cast<const unsigned char*>(target.c_str()), target.size());
-}
-
 std::string percentDecode(std::string::const_iterator first,
                           std::string::const_iterator last)
 {
@@ -1809,17 +1789,6 @@ std::string getConfigFile()
   if (!File(filename).exists()) {
     filename = getXDGDir("XDG_CONFIG_HOME", getHomeDir() + "/.config") +
                "/aria2/aria2.conf";
-  }
-  return filename;
-}
-
-std::string getDHTFile(bool ipv6)
-{
-  std::string filename =
-      getHomeDir() + (ipv6 ? "/.aria2/dht6.dat" : "/.aria2/dht.dat");
-  if (!File(filename).exists()) {
-    filename = getXDGDir("XDG_CACHE_HOME", getHomeDir() + "/.cache") +
-               (ipv6 ? "/aria2/dht6.dat" : "/aria2/dht.dat");
   }
   return filename;
 }

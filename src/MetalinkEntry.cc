@@ -112,9 +112,6 @@ public:
 #ifdef ENABLE_SSL
     case MetalinkResource::TYPE_HTTPS:
 #endif // ENABLE_SSL
-#ifdef ENABLE_BITTORRENT
-    case MetalinkResource::TYPE_BITTORRENT:
-#endif // ENABLE_BITTORRENT
       return true;
     default:
       return false;
@@ -134,9 +131,6 @@ void MetalinkEntry::dropUnsupportedResource()
 #ifdef ENABLE_SSL
                        case MetalinkResource::TYPE_HTTPS:
 #endif // ENABLE_SSL
-#ifdef ENABLE_BITTORRENT
-                       case MetalinkResource::TYPE_BITTORRENT:
-#endif // ENABLE_BITTORRENT
                          return false;
                        default:
                          return true;

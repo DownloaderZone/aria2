@@ -19,7 +19,6 @@ class Aria2ApiTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(Aria2ApiTest);
   CPPUNIT_TEST(testAddUri);
   CPPUNIT_TEST(testAddMetalink);
-  CPPUNIT_TEST(testAddTorrent);
   CPPUNIT_TEST(testRemovePause);
   CPPUNIT_TEST(testChangePosition);
   CPPUNIT_TEST(testChangeOption);
@@ -41,7 +40,6 @@ public:
 
   void testAddUri();
   void testAddMetalink();
-  void testAddTorrent();
   void testRemovePause();
   void testChangePosition();
   void testChangeOption();
@@ -79,11 +77,7 @@ void Aria2ApiTest::testAddMetalink()
   KeyVals options;
 #ifdef ENABLE_METALINK
   CPPUNIT_ASSERT_EQUAL(0, addMetalink(session_, &gids, metalinkPath, options));
-#  ifdef ENABLE_BITTORRENT
-  CPPUNIT_ASSERT_EQUAL((size_t)2, gids.size());
-#  else  // !ENABLE_BITTORRENT
   CPPUNIT_ASSERT_EQUAL((size_t)1, gids.size());
-#  endif // !ENABLE_BITTORRENT
 
   gids.clear();
   options.push_back(KeyVals::value_type("file-allocation", "foo"));
@@ -91,22 +85,6 @@ void Aria2ApiTest::testAddMetalink()
 #else  // !ENABLE_METALINK
   CPPUNIT_ASSERT_EQUAL(-1, addMetalink(session_, &gids, metalinkPath, options));
 #endif // !ENABLE_METALINK
-}
-
-void Aria2ApiTest::testAddTorrent()
-{
-  std::string torrentPath = A2_TEST_DIR "/test.torrent";
-  A2Gid gid;
-  KeyVals options;
-#ifdef ENABLE_BITTORRENT
-  CPPUNIT_ASSERT_EQUAL(0, addTorrent(session_, &gid, torrentPath, options));
-  CPPUNIT_ASSERT(!isNull(gid));
-
-  options.push_back(KeyVals::value_type("file-allocation", "foo"));
-  CPPUNIT_ASSERT_EQUAL(-1, addTorrent(session_, &gid, torrentPath, options));
-#else  // !ENABLE_BITTORRENT
-  CPPUNIT_ASSERT_EQUAL(-1, addTorrent(session_, &gid, torrentPath, options));
-#endif // !ENABLE_BITTORRENT
 }
 
 void Aria2ApiTest::testRemovePause()

@@ -85,13 +85,14 @@
 #include "OpenedFileCounter.h"
 #include "wallclock.h"
 #include "RpcMethodImpl.h"
-#ifdef ENABLE_BITTORRENT
-#  include "bittorrent_helper.h"
-#endif // ENABLE_BITTORRENT
 
 namespace aria2 {
 
 namespace {
+// Upper limit of the number of files opened simultaneously for
+// multi-file downloads.
+constexpr int DEFAULT_MAX_OPEN_FILES = 100;
+
 template <typename InputIterator>
 void appendReservedGroup(RequestGroupList& list, InputIterator first,
                          InputIterator last)
@@ -115,15 +116,13 @@ RequestGroupMan::RequestGroupMan(
       serverStatMan_(std::make_shared<ServerStatMan>()),
       maxOverallDownloadSpeedLimit_(
           option->getAsInt(PREF_MAX_OVERALL_DOWNLOAD_LIMIT)),
-      maxOverallUploadSpeedLimit_(
-          option->getAsInt(PREF_MAX_OVERALL_UPLOAD_LIMIT)),
       keepRunning_(option->getAsBool(PREF_ENABLE_RPC)),
       queueCheck_(true),
       removedErrorResult_(0),
       removedLastErrorResult_(error_code::FINISHED),
       maxDownloadResult_(option->getAsInt(PREF_MAX_DOWNLOAD_RESULT)),
       openedFileCounter_(std::make_shared<OpenedFileCounter>(
-          this, option->getAsInt(PREF_BT_MAX_OPEN_FILES))),
+          this, DEFAULT_MAX_OPEN_FILES)),
       numStoppedTotal_(0)
 {
   setupOptimizeConcurrentDownloads();
@@ -354,9 +353,7 @@ public:
       const std::shared_ptr<DownloadContext>& dctx =
           group->getDownloadContext();
 
-      if (!group->isSeedOnlyEnabled()) {
-        e_->getRequestGroupMan()->decreaseNumActive();
-      }
+      e_->getRequestGroupMan()->decreaseNumActive();
 
       // DownloadContext::resetDownloadStopTime() is only called when
       // download completed. If
@@ -396,29 +393,6 @@ public:
                              static_cast<unsigned long>(nextGroups.size())));
             e_->getRequestGroupMan()->insertReservedGroup(0, nextGroups);
           }
-#ifdef ENABLE_BITTORRENT
-          // For in-memory download (e.g., Magnet URI), the
-          // FileEntry::getPath() does not return actual file path, so
-          // we don't remove it.
-          if (group->getOption()->getAsBool(PREF_BT_REMOVE_UNSELECTED_FILE) &&
-              !group->inMemoryDownload() && dctx->hasAttribute(CTX_ATTR_BT)) {
-            A2_LOG_INFO(fmt(MSG_REMOVING_UNSELECTED_FILE,
-                            GroupId::toHex(group->getGID()).c_str()));
-            const std::vector<std::shared_ptr<FileEntry>>& files =
-                dctx->getFileEntries();
-            for (auto& file : files) {
-              if (!file->isRequested()) {
-                if (File(file->getPath()).remove()) {
-                  A2_LOG_INFO(fmt(MSG_FILE_REMOVED, file->getPath().c_str()));
-                }
-                else {
-                  A2_LOG_INFO(
-                      fmt(MSG_FILE_COULD_NOT_REMOVED, file->getPath().c_str()));
-                }
-              }
-            }
-          }
-#endif // ENABLE_BITTORRENT
         }
         else {
           A2_LOG_NOTICE(
@@ -987,12 +961,6 @@ bool RequestGroupMan::doesOverallDownloadSpeedExceed()
 {
   return maxOverallDownloadSpeedLimit_ > 0 &&
          maxOverallDownloadSpeedLimit_ < netStat_.calculateDownloadSpeed();
-}
-
-bool RequestGroupMan::doesOverallUploadSpeedExceed()
-{
-  return maxOverallUploadSpeedLimit_ > 0 &&
-         maxOverallUploadSpeedLimit_ < netStat_.calculateUploadSpeed();
 }
 
 void RequestGroupMan::getUsedHosts(

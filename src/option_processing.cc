@@ -55,7 +55,6 @@
 #include "UnknownOptionException.h"
 #include "error_code.h"
 #include "SimpleRandomizer.h"
-#include "bittorrent_helper.h"
 #include "BufferedFile.h"
 #include "console.h"
 #include "array_fun.h"
@@ -304,9 +303,6 @@ error_code::Value option_processing(Option& op, bool standalone,
     global::redirectStdoutToStderr();
   }
   if (standalone && !op.getAsBool(PREF_ENABLE_RPC) &&
-#ifdef ENABLE_BITTORRENT
-      op.blank(PREF_TORRENT_FILE) &&
-#endif // ENABLE_BITTORRENT
 #ifdef ENABLE_METALINK
       op.blank(PREF_METALINK_FILE) &&
 #endif // ENABLE_METALINK

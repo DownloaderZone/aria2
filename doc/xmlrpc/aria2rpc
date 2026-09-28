@@ -101,55 +101,6 @@ OptionParser.new do |opt|
     options["reuse-uri"]=val||"true"
   }
   opt.on("--select-file INDEXES"){|val| options["select-file"]=val}
-  opt.on("--bt-enable-lpd [BOOL]",["true","false"]){|val|
-    options["bt-enable-lpd"]=val||"true"
-  }
-  opt.on("--bt-external-ip IPADDRESS"){|val| options["bt-external-ip"]=val}
-  opt.on("--bt-hash-check-seed [BOOL]",["true","false"]){|val|
-    options["bt-hash-check-seed"]=val||"true"
-  }
-  opt.on("--bt-max-open-files NUM"){|val| options["bt-max-open-files"]=val}
-  opt.on("--bt-max-peers NUM"){|val| options["bt-max-peers"]=val}
-  opt.on("--bt-metadata-only [BOOL]",["true","false"]){|val|
-    options["bt-metadata-only"]=val||"true"
-  }
-  opt.on("--bt-min-crypto-level LEVEL",["plain","arc4"]){|val|
-    options["bt-min-crypto-level"]=val
-  }
-  opt.on("--bt-prioritize-piece RANGE") {|val|
-    options["bt-prioritize-piece"]=val
-  }
-  opt.on("--bt-require-crypto [BOOL]",["true","false"]){|val|
-    options["bt-require-crypto"]=val||"true"
-  }
-  opt.on("--bt-request-peer-speed-limit SPEED"){|val|
-    options["bt-request-peer-speed-limit"]=val
-  }
-  opt.on("--bt-save-metadata [BOOL]",["true","false"]){|val|
-    options["bt-save-metadata"]=val||"true"
-  }
-  opt.on("--bt-seed-unverified [BOOL]",["true","false"]){|val|
-    options["bt-seed-unverified"]=val||"true"
-  }
-  opt.on("--bt-stop-timeout SEC"){|val| options["bt-stop-timeout"]=val}
-  opt.on("--bt-tracker-interval SEC"){|val| options["bt-tracker-interval"]=val}
-  opt.on("--bt-tracker-timeout SEC"){|val| options["bt-tracker-timeout"]=val}
-  opt.on("--bt-tracker-connect-timeout SEC"){|val|
-    options["bt-tracker-connect-timeout"]=val
-  }
-  opt.on("--enable-peer-exchange [BOOL]",["true","false"]){|val|
-    options["enable-peer-exchange"]=val||"true"
-  }
-  opt.on("--follow-torrent VALUE", ["true","false","mem"]){|val|
-    options["follow-torrent"]=val
-  }
-  opt.on("-O","--index-out INDEXPATH"){|val|
-    options["index-out"]=[] if options["index-out"] == nil
-    options["index-out"] << val
-  }
-  opt.on("-u","--max-upload-limit SPEED"){|val| options["max-upload-limit"]=val}
-  opt.on("--seed-ratio RATIO"){|val| options["seed-ratio"]=val}
-  opt.on("--seed-time MINUTES"){|val| options["seed-time"]=val}
   opt.on("--follow-metalink VALUE", ["true","false","mem"]){|val|
     options["follow-metalink"]=val
   }
@@ -209,8 +160,6 @@ OptionParser.new do |opt|
   opt.on("--enable-async-dns6 [BOOL]",["true","false"]){|val|
     options["enable-async-dns6"]=val||"true"
   }
-  opt.on("--bt-tracker URIS"){|val| options["bt-tracker"]=val}
-  opt.on("--bt-exclude-tracker URIS"){|val| options["bt-exclude-tracker"]=val}
   opt.on("--retry-wait SEC"){|val| options["retry-wait"]=val}
   opt.on("--metalink-base-uri URI"){|val| options["metalink-base-uri"]=val}
   opt.on("--pause [BOOL]",["true","false"]){|val| options["pause"]=val||"true"}
@@ -223,7 +172,6 @@ OptionParser.new do |opt|
   opt.on("--uri-selector SELECTOR"){|val| options["uri-selector"]=val}
 
   opt.on("--max-overall-download-limit LIMIT"){|val| options["max-overall-download-limit"]=val}
-  opt.on("--max-overall-upload-limit LIMIT"){|val| options["max-overall-upload-limit"]=val}
   opt.on("-j","--max-concurrent-downloads N"){|val| options["max-concurrent-downloads"]=val}
   opt.on("-l","--log FILE"){|val| options["log"]=val}
   opt.on("--max-download-result NUM"){|val| options["max-download-result"]=val}
@@ -249,7 +197,6 @@ OptionParser.new do |opt|
 
   opt.banner=<<EOS
 Usage: #{program_name} addUri URI... [options]
-       #{program_name} addTorrent /path/to/torrent_file URI... [options]
        #{program_name} addMetalink /path/to/metalink_file [options]
        #{program_name} remove GID [options]
        #{program_name} forceRemove GID [options]
@@ -268,7 +215,6 @@ Usage: #{program_name} addUri URI... [options]
        #{program_name} getGlobalOption [options]
        #{program_name} getFiles   GID [options]
        #{program_name} getUris    GID [options]
-       #{program_name} getPeers   GID [options]
        #{program_name} getServers GID [options]
        #{program_name} purgeDownloadResult [options]
        #{program_name} removeDownloadResult GID [options]
@@ -346,10 +292,6 @@ end
 
 if command == "addUri" then
   result=client_call(client, secret, "aria2."+command, resources, options)
-elsif command == "addTorrent" then
-  torrentData=IO.read(resources[0])
-  result=client_call(client, secret, "aria2."+command,
-                     XMLRPC::Base64.new(torrentData), resources[1..-1], options)
 elsif command == "addMetalink" then
   metalinkData=IO.read(resources[0])
   result=client_call(client, secret, "aria2."+command,
@@ -391,8 +333,6 @@ elsif command == "changePosition" then
 elsif command == "getFiles" then
   result=client_call(client, secret, "aria2."+command, resources[0])
 elsif command == "getUris" then
-  result=client_call(client, secret, "aria2."+command, resources[0])
-elsif command == "getPeers" then
   result=client_call(client, secret, "aria2."+command, resources[0])
 elsif command == "getServers" then
   result=client_call(client, secret, "aria2."+command, resources[0])

@@ -56,7 +56,6 @@ ARIA2_ARG_WITHOUT([appletls])
 ARIA2_ARG_WITHOUT([wintls])
 ARIA2_ARG_WITHOUT([gnutls])
 ARIA2_ARG_WITHOUT([libnettle])
-ARIA2_ARG_WITHOUT([libgmp])
 ARIA2_ARG_WITHOUT([libgcrypt])
 ARIA2_ARG_WITHOUT([openssl])
 ARIA2_ARG_WITHOUT([sqlite3])
@@ -69,7 +68,6 @@ ARIA2_ARG_WITH([jemalloc])
 ARIA2_ARG_WITHOUT([libssh2])
 
 ARIA2_ARG_DISABLE([ssl])
-ARIA2_ARG_DISABLE([bittorrent])
 ARIA2_ARG_DISABLE([metalink])
 ARIA2_ARG_DISABLE([websocket])
 ARIA2_ARG_DISABLE([epoll])
@@ -430,7 +428,6 @@ if test "x$with_openssl" = "xyes" && test "x$have_ssl" != "xyes"; then
 fi
 
 have_libnettle=no
-have_libgmp=no
 have_libgcrypt=no
 if test "x$have_openssl" != "xyes"; then
   if test "x$with_libnettle" = "xyes" &&
@@ -441,31 +438,6 @@ if test "x$have_openssl" != "xyes"; then
       AC_DEFINE([HAVE_LIBNETTLE], [1], [Define to 1 if you have libnettle.])
     elif test "x$with_libnettle_requested" = "xyes"; then
       ARIA2_DEP_NOT_MET([nettle])
-    fi
-  fi
-  if test "x$with_libgmp" = "xyes" &&
-     (test "x$have_libnettle" = "xyes" ||
-      test "x$have_nativetls" = "xyes") &&
-     test "x$enable_bittorrent" = "xyes"; then
-    AC_CHECK_LIB([gmp], [__gmpz_init], [have_libgmp=yes], [have_libgmp=no])
-    if test "x$have_libgmp" = "xyes"; then
-      LIBGMP_CFLAGS=
-      LIBGMP_LIBS=-lgmp
-      AC_SUBST([LIBGMP_CFLAGS])
-      AC_SUBST([LIBGMP_LIBS])
-      AC_DEFINE([HAVE_LIBGMP], [1], [Define to 1 if you have libgmp.])
-      save_LIBS=$LIBS
-      LIBS="$LIBGMP_LIBS $LIBS"
-      AC_CHECK_FUNCS([__gmpz_powm_sec], [have_mpz_powm_sec=yes])
-      LIBS=$save_LIBS
-      if test "x$have_mpz_powm_sec" = "xyes"; then
-        AC_DEFINE([HAVE_GMP_SEC], [1], [Define to 1 if you have a GMP with sec functions.])
-      fi
-    else
-      AC_MSG_WARN([libgmp not found])
-      if test "x$with_libgmp_requested" = "xyes"; then
-        ARIA2_DEP_NOT_MET([libgmp])
-      fi
     fi
   fi
   if test "x$with_libgcrypt" = "xyes" &&
@@ -559,42 +531,11 @@ AM_CONDITIONAL([USE_WINDOWS_MD], [ test "x$use_md" = "xwindows" ])
 AM_CONDITIONAL([HAVE_LIBGNUTLS], [ test "x$have_libgnutls" = "xyes" ])
 AM_CONDITIONAL([HAVE_LIBNETTLE], [ test "x$have_libnettle" = "xyes" ])
 AM_CONDITIONAL([USE_LIBNETTLE_MD], [ test "x$use_md" = "xlibnettle"])
-AM_CONDITIONAL([HAVE_LIBGMP], [ test "x$have_libgmp" = "xyes" ])
 AM_CONDITIONAL([HAVE_LIBGCRYPT], [ test "x$have_libgcrypt" = "xyes" ])
 AM_CONDITIONAL([USE_LIBGCRYPT_MD], [ test "x$use_md" = "xlibgcrypt"])
 AM_CONDITIONAL([HAVE_OPENSSL], [ test "x$have_openssl" = "xyes" ])
 AM_CONDITIONAL([USE_OPENSSL_MD], [ test "x$use_md" = "xopenssl"])
 AM_CONDITIONAL([USE_INTERNAL_MD], [ test "x$use_md" = "xinternal"])
-
-if test "x$have_libgmp" = "xyes" ||
-   test "x$have_libgcrypt" = "xyes" ||
-   test "x$have_openssl" = "xyes"; then
-  AM_CONDITIONAL([USE_INTERNAL_BIGNUM], false)
-else
-  AC_DEFINE([USE_INTERNAL_BIGNUM], [1], [Define to 1 if internal BIGNUM support is enabled.])
-  AM_CONDITIONAL([USE_INTERNAL_BIGNUM], true)
-fi
-
-if test "x$have_libnettle" = "xyes" ||
-   test "x$have_libgcrypt" = "xyes" ||
-   test "x$have_openssl" = "xyes"; then
-  AM_CONDITIONAL([USE_INTERNAL_ARC4], false)
-else
-  AC_DEFINE([USE_INTERNAL_ARC4], [1], [Define to 1 if internal ARC4 support is enabled.])
-  AM_CONDITIONAL([USE_INTERNAL_ARC4], true)
-fi
-
-if test "x$enable_bittorrent" = "xyes"; then
-  AC_DEFINE([ENABLE_BITTORRENT], [1],
-            [Define to 1 if BitTorrent support is enabled.])
-  AM_CONDITIONAL([ENABLE_BITTORRENT], true)
-else
-  if test "x$enable_bittorrent_requested" = "xyes"; then
-    ARIA2_FET_NOT_SUPPORTED([bittorrent])
-  fi
-  enable_bittorrent=no
-  AM_CONDITIONAL([ENABLE_BITTORRENT], false)
-fi
 
 if (test "x$have_libxml2" = "xyes" || test "x$have_libexpat" = "xyes") &&
    test "x$enable_metalink" = "xyes"; then
@@ -1098,7 +1039,6 @@ GnuTLS:         $have_libgnutls (CFLAGS='$LIBGNUTLS_CFLAGS' LIBS='$LIBGNUTLS_LIB
 OpenSSL:        $have_openssl (CFLAGS='$OPENSSL_CFLAGS' LIBS='$OPENSSL_LIBS')
 CA Bundle:      $ca_bundle
 LibNettle:      $have_libnettle (CFLAGS='$LIBNETTLE_CFLAGS' LIBS='$LIBNETTLE_LIBS')
-LibGmp:         $have_libgmp (CFLAGS='$LIBGMP_CFLAGS' LIBS='$LIBGMP_LIBS')
 LibGcrypt:      $have_libgcrypt (CFLAGS='$LIBGCRYPT_CFLAGS' LIBS='$LIBGCRYPT_LIBS')
 LibXML2:        $have_libxml2 (CFLAGS='$LIBXML2_CFLAGS' LIBS='$LIBXML2_LIBS')
 LibExpat:       $have_libexpat (CFLAGS='$EXPAT_CFLAGS' LIBS='$EXPAT_LIBS')
@@ -1108,7 +1048,6 @@ Libssh2:        $have_libssh2 (CFLAGS='$LIBSSH2_CFLAGS' LIBS='$LIBSSH2_LIBS')
 Tcmalloc:       $have_tcmalloc (CFLAGS='$TCMALLOC_CFLAGS' LIBS='$TCMALLOC_LIBS')
 Jemalloc:       $have_jemalloc (CFLAGS='$JEMALLOC_CFLAGS' LIBS='$JEMALLOC_LIBS')
 Epoll:          $have_epoll
-Bittorrent:     $enable_bittorrent
 Metalink:       $enable_metalink
 XML-RPC:        $enable_xml_rpc
 Message Digest: $use_md

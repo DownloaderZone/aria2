@@ -46,7 +46,6 @@ public:
     TYPE_FTP = 0,
     TYPE_HTTP,
     TYPE_HTTPS,
-    TYPE_BITTORRENT,
     TYPE_NOT_SUPPORTED,
     TYPE_UNKNOWN
   };

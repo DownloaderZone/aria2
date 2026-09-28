@@ -332,32 +332,6 @@ std::string CumulativeOptionHandler::createPossibleValuesString() const
   return possibleValuesString_;
 }
 
-IndexOutOptionHandler::IndexOutOptionHandler(PrefPtr pref,
-                                             const char* description,
-                                             char shortName)
-    : AbstractOptionHandler(pref, description, NO_DEFAULT_VALUE,
-                            OptionHandler::REQ_ARG, shortName)
-{
-}
-
-IndexOutOptionHandler::~IndexOutOptionHandler() = default;
-
-void IndexOutOptionHandler::parseArg(Option& option,
-                                     const std::string& optarg) const
-{
-  // See optarg is in the format of "INDEX=PATH"
-  util::parseIndexPath(optarg);
-  std::string value = option.get(pref_);
-  value += optarg;
-  value += "\n";
-  option.put(pref_, value);
-}
-
-std::string IndexOutOptionHandler::createPossibleValuesString() const
-{
-  return "INDEX=PATH";
-}
-
 ChecksumOptionHandler::ChecksumOptionHandler(PrefPtr pref,
                                              const char* description,
                                              char shortName)

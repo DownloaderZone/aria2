@@ -53,17 +53,4 @@ constexpr const char* METALINK_CONTENT_TYPES[] = {
 
 const char* const* getMetalinkContentTypes() { return METALINK_CONTENT_TYPES; }
 
-namespace {
-constexpr const char* BT_EXTENSIONS[] = {".torrent", nullptr};
-} // namespace
-
-const char* const* getBtExtensions() { return BT_EXTENSIONS; }
-
-namespace {
-constexpr const char* BT_CONTENT_TYPES[] = {"application/x-bittorrent",
-                                            nullptr};
-} // namespace
-
-const char* const* getBtContentTypes() { return BT_CONTENT_TYPES; }
-
 } // namespace aria2

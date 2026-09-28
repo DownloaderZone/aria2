@@ -46,19 +46,18 @@ a download. Here is the diagram for each field:
    be disappear in the future version.
 
 ``EXT`` (EXTENSION): 4 bytes
-   If LSB is 1(i.e. ``EXT[3]&1 == 1``), aria2 checks whether the saved
-   InfoHash and current downloading one are the same. If they are not
-   the same, an exception is thrown. This is called "infoHashCheck"
-   extension.
+   Reserved. This field used to hold extension flags; the LSB enabled
+   the "infoHashCheck" extension, which compared the saved InfoHash
+   with the current downloading one. It is not used anymore.
 
 ``INFO HASH LENGTH``: 4 bytes
-   The length of InfoHash that is located after this field. If
-   "infoHashCheck" extension is enabled, if this value is 0, then an
-   exception is thrown. For http/ftp downloads, this value should be
-   0.
+   The length of InfoHash that is located after this field. The value
+   is validated and the INFO HASH field is skipped when a control file
+   is read. For HTTP/FTP/SFTP and Metalink downloads, this value is 0.
 
 ``INFO HASH``: ``(INFO HASH LENGTH)`` bytes
-   BitTorrent InfoHash.
+   The info hash of the download. aria2 does not store an info hash
+   anymore, so this value is empty and its length is 0.
 
 ``PIECE LENGTH``: 4 bytes
    The length of the piece.
@@ -95,72 +94,3 @@ times.
 ``PIECE BITFIELD``: ``(PIECE BITFIELD LENGTH)`` bytes
    The bitfield of this piece. The each bit represents 16KiB chunk.
 
-DHT routing table file format
------------------------------
-
-aria2 saves IPv4 DHT routing table in
-``${XDG_CACHE_HOME}/aria2/dht.dat`` and IPv6 DHT routing table in
-``${XDG_CACHE_HOME}/aria2/dht6.dat`` by default unless
-``${HOME}/.aria2/dht.dat`` and ``${HOME}/.aria2/dht.dat`` are present.
-
-``dht.dat`` and ``dht6.dat`` files use same binary encoding and have
-following fields. All multi byte integers are in network byte
-order. ``RSV`` (RESERVED) fields are reserved for future use. For now
-they should be all zeros:
-
-.. code-block:: text
-
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +---+-+-----+---+---------------+---------------+---------------+
-    |MGC|F| RSV |VER|     MTIME     |     RSV       |LOCAL NODE ID  :
-    |(2)|M| (3) |(2)|      (8)      |     (8)       |      (20)     :
-    |   |T|     |   |               |               |               :
-    +---+-+---+-----+-------+-------+-------+-------+---------------+
-    :LOCAL NODE ID          |  RSV  |  NUM  |  RSV  |
-    :  (continued)          |  (4)  |  NODE |  (4)  |
-    :                       |       |  (4)  |       |
-    +-+-------------+-------+-------+-+-----+-------+---------------+
-    |P|     RSV     |COMPACT PEER INFO|            RSV              | <-+
-    |L|     (7)     |     (PLEN)      |         (24 - PLEN)         |   |
-    |E|             |                 |                             |   |
-    |N|             |                 |                             |   |
-    +-+-------------+-----------------+-----+-------+---------------+   |
-    |            NODE ID                    |  RSV  |                   |
-    |             (20)                      |  (4)  | <-----------------+
-    +---------------------------------------+-------+   Repeated in
-                                                         (NUM NODE) times.
-
-``MGC`` (MAGIC): 2 bytes
-   It must be ``0xa1 0xa2``.
-
-``FMT`` (FORMAT ID): 1 byte
-   The format ID should be ``0x02``.
-
-``VER`` (VERSION): 2 bytes
-   The version number should be ``0x00 0x03``.
-
-``MTIME``: 8 bytes
-   This is the time when aria2 saved the file.  The value is the time
-   since the Epoch(1970/1/1 00:00:00) in 64 bits integer.
-
-``LOCALNODE ID``: 20 bytes
-   Node ID of the client.
-
-``NUM NODE``: 4 bytes
-   The number of nodes the routing table has. ``NUM NODE`` node
-   information follows.
-
-The data of ``NUM NODE`` node will follow.  The node information are
-stored in the following fields.  They are repeated in ``NUM NODE``
-times.
-
-``PLEN`` (COMPACT PEER INFO LENGTH): 1 byte
-   The length of compact peer info. For IPv4 DHT, it must be 6. For
-   IPv6 DHT, it must be 18.
-
-``COMPACT PEER INFO``: ``(PLEN)`` bytes
-   The address and port of peer in compact peer format.
-
-``NODE ID``: 20 bytes
-   The node ID of this node.

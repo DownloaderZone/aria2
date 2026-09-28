@@ -84,11 +84,9 @@ private:
   int optimizationSpeed_;
   Timer optimizationSpeedTimer_;
 
-  // The number of simultaneous active downloads, excluding seed only
-  // item if PREF_BT_DETACH_SEED_ONLY is true.  We rely on this
-  // variable to maintain the number of concurrent downloads.  If
-  // PREF_BT_DETACH_SEED_ONLY is false, this variable is equal to
-  // requestGroups_.size().
+  // The number of simultaneous active downloads.  We rely on this
+  // variable to maintain the number of concurrent downloads.  It is
+  // equal to requestGroups_.size().
   size_t numActive_;
 
   const Option* option_;
@@ -96,8 +94,6 @@ private:
   std::shared_ptr<ServerStatMan> serverStatMan_;
 
   int maxOverallDownloadSpeedLimit_;
-
-  int maxOverallUploadSpeedLimit_;
 
   NetStat netStat_;
 
@@ -299,21 +295,6 @@ public:
   int getMaxOverallDownloadSpeedLimit() const
   {
     return maxOverallDownloadSpeedLimit_;
-  }
-
-  // Returns true if current upload speed exceeds
-  // maxOverallUploadSpeedLimit_. Always returns false if
-  // maxOverallUploadSpeedLimit_ == 0. Otherwise returns false.
-  bool doesOverallUploadSpeedExceed();
-
-  void setMaxOverallUploadSpeedLimit(int speed)
-  {
-    maxOverallUploadSpeedLimit_ = speed;
-  }
-
-  int getMaxOverallUploadSpeedLimit() const
-  {
-    return maxOverallUploadSpeedLimit_;
   }
 
   void setMaxConcurrentDownloads(int max) { maxConcurrentDownloads_ = max; }

@@ -45,10 +45,6 @@ const char* const* getMetalinkExtensions();
 
 const char* const* getMetalinkContentTypes();
 
-const char* const* getBtExtensions();
-
-const char* const* getBtContentTypes();
-
 } // namespace aria2
 
 #endif // D_DOWNLOAD_HANDLER_CONSTANTS_H

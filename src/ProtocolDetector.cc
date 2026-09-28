@@ -43,9 +43,6 @@
 #include "RecoverableException.h"
 #include "uri.h"
 #include "BufferedFile.h"
-#ifdef ENABLE_BITTORRENT
-#  include "bittorrent_helper.h"
-#endif // ENABLE_BITTORRENT
 
 namespace aria2 {
 
@@ -56,38 +53,6 @@ ProtocolDetector::~ProtocolDetector() = default;
 bool ProtocolDetector::isStreamProtocol(const std::string& uri) const
 {
   return uri_split(nullptr, uri.c_str()) == 0;
-}
-
-bool ProtocolDetector::guessTorrentFile(const std::string& uri) const
-{
-  BufferedFile fp(uri.c_str(), BufferedFile::READ);
-  if (fp) {
-    char head[1];
-    if (fp.read(head, sizeof(head)) == sizeof(head)) {
-      return head[0] == 'd';
-    }
-    else {
-      return false;
-    }
-  }
-  else {
-    return false;
-  }
-}
-
-bool ProtocolDetector::guessTorrentMagnet(const std::string& uri) const
-{
-#ifdef ENABLE_BITTORRENT
-  try {
-    bittorrent::parseMagnet(uri);
-    return true;
-  }
-  catch (RecoverableException& e) {
-    return false;
-  }
-#else  // !ENABLE_BITTORRENT
-  return false;
-#endif // !ENABLE_BITTORRENT
 }
 
 bool ProtocolDetector::guessMetalinkFile(const std::string& uri) const

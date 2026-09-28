@@ -55,14 +55,6 @@ const PostDownloadHandler* getMetalinkPostDownloadHandler();
 
 #endif // ENABLE_METALINK
 
-#ifdef ENABLE_BITTORRENT
-
-const PreDownloadHandler* getBtPreDownloadHandler();
-const PostDownloadHandler* getBtPostDownloadHandler();
-const PostDownloadHandler* getUTMetadataPostDownloadHandler();
-
-#endif // ENABLE_BITTORRENT
-
 } // namespace download_handlers
 
 } // namespace aria2

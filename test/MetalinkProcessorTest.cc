@@ -133,16 +133,7 @@ void MetalinkProcessorTest::testParseFileV4()
   CPPUNIT_ASSERT_EQUAL(std::string("ftp"),
                        MetalinkResource::getTypeString(r->type));
   CPPUNIT_ASSERT_EQUAL(-1, r->maxConnections);
-#ifdef ENABLE_BITTORRENT
-  CPPUNIT_ASSERT_EQUAL((size_t)1, e->metaurls.size());
-  auto& mu = e->metaurls[0];
-  CPPUNIT_ASSERT_EQUAL(std::string("http://example.com/example.ext.torrent"),
-                       mu->url);
-  CPPUNIT_ASSERT_EQUAL(2, mu->priority);
-  CPPUNIT_ASSERT_EQUAL(std::string("torrent"), mu->mediatype);
-#else  // !ENABLE_BITTORRENT
   CPPUNIT_ASSERT_EQUAL((size_t)0, e->metaurls.size());
-#endif // !ENABLE_BITTORRENT
 }
 
 void MetalinkProcessorTest::testParseFileV4_attrs()

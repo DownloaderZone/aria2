@@ -236,10 +236,6 @@ bool isUtf8(const std::string& str);
 std::string percentDecode(std::string::const_iterator first,
                           std::string::const_iterator last);
 
-std::string torrentPercentEncode(const unsigned char* target, size_t len);
-
-std::string torrentPercentEncode(const std::string& target);
-
 std::string toHex(const unsigned char* src, size_t len);
 
 std::string toHex(const char* src, size_t len);
@@ -356,8 +352,6 @@ std::string getXDGDir(const std::string& environmentVariable,
                       const std::string& fallbackDirectory);
 
 std::string getConfigFile();
-
-std::string getDHTFile(bool ipv6);
 
 int64_t getRealSize(const std::string& sizeWithUnit);
 

@@ -43,7 +43,6 @@
 
 #include "RpcRequest.h"
 #include "ValueBase.h"
-#include "TorrentAttribute.h"
 #include "DlAbortEx.h"
 #include "fmt.h"
 #include "IndexedList.h"
@@ -208,17 +207,6 @@ public:
   static const char* getMethodName() { return "aria2.unpauseAll"; }
 };
 
-#ifdef ENABLE_BITTORRENT
-class AddTorrentRpcMethod : public RpcMethod {
-protected:
-  virtual std::unique_ptr<ValueBase> process(const RpcRequest& req,
-                                             DownloadEngine* e) CXX11_OVERRIDE;
-
-public:
-  static const char* getMethodName() { return "aria2.addTorrent"; }
-};
-#endif // ENABLE_BITTORRENT
-
 #ifdef ENABLE_METALINK
 class AddMetalinkRpcMethod : public RpcMethod {
 protected:
@@ -265,17 +253,6 @@ protected:
 public:
   static const char* getMethodName() { return "aria2.getFiles"; }
 };
-
-#ifdef ENABLE_BITTORRENT
-class GetPeersRpcMethod : public RpcMethod {
-protected:
-  virtual std::unique_ptr<ValueBase> process(const RpcRequest& req,
-                                             DownloadEngine* e) CXX11_OVERRIDE;
-
-public:
-  static const char* getMethodName() { return "aria2.getPeers"; }
-};
-#endif // ENABLE_BITTORRENT
 
 class GetServersRpcMethod : public RpcMethod {
 protected:
@@ -566,11 +543,6 @@ void gatherStoppedDownload(Dict* entryDict,
 void gatherProgressCommon(Dict* entryDict,
                           const std::shared_ptr<RequestGroup>& group,
                           const std::vector<std::string>& keys);
-
-#ifdef ENABLE_BITTORRENT
-// Helper function to store BitTorrent metadata from torrentAttrs.
-void gatherBitTorrentMetadata(Dict* btDict, TorrentAttribute* torrentAttrs);
-#endif // ENABLE_BITTORRENT
 
 } // namespace rpc
 

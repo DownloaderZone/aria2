@@ -84,8 +84,7 @@ void showVersion()
 void showUsage(const std::string& keyword,
                const std::shared_ptr<OptionParser>& oparser, const Console& out)
 {
-  out->printf(_("Usage: aria2c [OPTIONS] [URI | MAGNET | TORRENT_FILE |"
-                " METALINK_FILE]..."));
+  out->printf(_("Usage: aria2c [OPTIONS] [URI | METALINK_FILE]..."));
   out->printf("\n");
   if (keyword.empty()) {
     // Very short version of usage.
@@ -139,29 +138,16 @@ void showUsage(const std::string& keyword,
     }
   }
   if (keyword == strHelpTag(TAG_BASIC)) {
-    out->printf("URI, MAGNET, TORRENT_FILE, METALINK_FILE:\n");
+    out->printf("URI, METALINK_FILE:\n");
     out->printf(
         _(" You can specify multiple HTTP(S)/FTP URIs. Unless you specify -Z "
           "option, all\n"
           " URIs must point to the same file or downloading will fail."));
     out->printf("\n");
-    out->printf(_(" You can also specify arbitrary number of BitTorrent Magnet "
-                  "URIs, torrent/\n"
-                  " metalink files stored in a local drive. Please note that "
-                  "they are always\n"
-                  " treated as a separate download."));
-    out->printf("\n\n");
-    out->printf(_(" You can specify both torrent file with -T option and URIs. "
-                  "By doing this,\n"
-                  " download a file from both torrent swarm and HTTP/FTP "
-                  "server at the same time,\n"
-                  " while the data from HTTP/FTP are uploaded to the torrent "
-                  "swarm. For single file\n"
-                  " torrents, URI can be a complete URI pointing to the "
-                  "resource or if URI ends\n"
-                  " with '/', 'name' in torrent file is added. For multi-file "
-                  "torrents, 'name' and\n"
-                  " 'path' in torrent are added to form a URI for each file."));
+    out->printf(_(" You can also specify arbitrary number of metalink files "
+                  "stored in a local drive.\n"
+                  " Please note that they are always treated as a separate "
+                  "download."));
     out->printf("\n\n");
     out->printf(_(" Make sure that URI is quoted with single(\') or double(\") "
                   "quotation if it\n"

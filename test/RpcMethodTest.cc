@@ -21,11 +21,6 @@
 #include "download_helper.h"
 #include "FileEntry.h"
 #include "RpcMethodFactory.h"
-#ifdef ENABLE_BITTORRENT
-#  include "BtRegistry.h"
-#  include "BtRuntime.h"
-#  include "bittorrent_helper.h"
-#endif // ENABLE_BITTORRENT
 
 namespace aria2 {
 
@@ -41,12 +36,6 @@ class RpcMethodTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testAddUri_withBadOption);
   CPPUNIT_TEST(testAddUri_withPosition);
   CPPUNIT_TEST(testAddUri_withBadPosition);
-#ifdef ENABLE_BITTORRENT
-  CPPUNIT_TEST(testAddTorrent);
-  CPPUNIT_TEST(testAddTorrent_withoutTorrent);
-  CPPUNIT_TEST(testAddTorrent_notBase64Torrent);
-  CPPUNIT_TEST(testAddTorrent_withPosition);
-#endif // ENABLE_BITTORRENT
 #ifdef ENABLE_METALINK
   CPPUNIT_TEST(testAddMetalink);
   CPPUNIT_TEST(testAddMetalink_withoutMetalink);
@@ -67,13 +56,7 @@ class RpcMethodTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testGetVersion);
   CPPUNIT_TEST(testNoSuchMethod);
   CPPUNIT_TEST(testGatherStoppedDownload);
-#ifdef ENABLE_BITTORRENT
-  CPPUNIT_TEST(testGatherStoppedDownload_bt);
-#endif // ENABLE_BITTORRENT
   CPPUNIT_TEST(testGatherProgressCommon);
-#ifdef ENABLE_BITTORRENT
-  CPPUNIT_TEST(testGatherBitTorrentMetadata);
-#endif // ENABLE_BITTORRENT
   CPPUNIT_TEST(testChangePosition);
   CPPUNIT_TEST(testChangePosition_fail);
   CPPUNIT_TEST(testGetSessionInfo);
@@ -111,12 +94,6 @@ public:
   void testAddUri_withBadOption();
   void testAddUri_withPosition();
   void testAddUri_withBadPosition();
-#ifdef ENABLE_BITTORRENT
-  void testAddTorrent();
-  void testAddTorrent_withoutTorrent();
-  void testAddTorrent_notBase64Torrent();
-  void testAddTorrent_withPosition();
-#endif // ENABLE_BITTORRENT
 #ifdef ENABLE_METALINK
   void testAddMetalink();
   void testAddMetalink_withoutMetalink();
@@ -137,13 +114,7 @@ public:
   void testGetVersion();
   void testNoSuchMethod();
   void testGatherStoppedDownload();
-#ifdef ENABLE_BITTORRENT
-  void testGatherStoppedDownload_bt();
-#endif // ENABLE_BITTORRENT
   void testGatherProgressCommon();
-#ifdef ENABLE_BITTORRENT
-  void testGatherBitTorrentMetadata();
-#endif // ENABLE_BITTORRENT
   void testChangePosition();
   void testChangePosition_fail();
   void testGetSessionInfo();
@@ -324,127 +295,6 @@ void RpcMethodTest::testAddUri_withBadPosition()
   CPPUNIT_ASSERT_EQUAL(1, res.code);
 }
 
-#ifdef ENABLE_BITTORRENT
-namespace {
-RpcRequest createAddTorrentReq()
-{
-  auto req = createReq(AddTorrentRpcMethod::getMethodName());
-  req.params->append(readFile(A2_TEST_DIR "/single.torrent"));
-  auto uris = List::g();
-  uris->append("http://localhost/aria2-0.8.2.tar.bz2");
-  req.params->append(std::move(uris));
-  return req;
-}
-} // namespace
-
-void RpcMethodTest::testAddTorrent()
-{
-  File(e_->getOption()->get(PREF_DIR) +
-       "/0a3893293e27ac0490424c06de4d09242215f0a6.torrent")
-      .remove();
-  AddTorrentRpcMethod m;
-  {
-    // Saving upload metadata is disabled by option.
-    auto res = m.execute(createAddTorrentReq(), e_.get());
-    CPPUNIT_ASSERT(!File(e_->getOption()->get(PREF_DIR) +
-                         "/0a3893293e27ac0490424c06de4d09242215f0a6.torrent")
-                        .exists());
-    CPPUNIT_ASSERT_EQUAL(0, res.code);
-    CPPUNIT_ASSERT_EQUAL(sizeof(a2_gid_t) * 2,
-                         downcast<String>(res.param)->s().size());
-  }
-  e_->getOption()->put(PREF_RPC_SAVE_UPLOAD_METADATA, A2_V_TRUE);
-  {
-    auto res = m.execute(createAddTorrentReq(), e_.get());
-    CPPUNIT_ASSERT(File(e_->getOption()->get(PREF_DIR) +
-                        "/0a3893293e27ac0490424c06de4d09242215f0a6.torrent")
-                       .exists());
-    CPPUNIT_ASSERT_EQUAL(0, res.code);
-    a2_gid_t gid;
-    CPPUNIT_ASSERT_EQUAL(
-        0, GroupId::toNumericId(gid, downcast<String>(res.param)->s().c_str()));
-
-    auto group = findReservedGroup(e_->getRequestGroupMan().get(), gid);
-    CPPUNIT_ASSERT(group);
-    CPPUNIT_ASSERT_EQUAL(e_->getOption()->get(PREF_DIR) +
-                             "/aria2-0.8.2.tar.bz2",
-                         group->getFirstFilePath());
-    CPPUNIT_ASSERT_EQUAL((size_t)1, group->getDownloadContext()
-                                        ->getFirstFileEntry()
-                                        ->getRemainingUris()
-                                        .size());
-    CPPUNIT_ASSERT_EQUAL(std::string("http://localhost/aria2-0.8.2.tar.bz2"),
-                         group->getDownloadContext()
-                             ->getFirstFileEntry()
-                             ->getRemainingUris()[0]);
-  }
-  {
-    auto req = createAddTorrentReq();
-    // with options
-    std::string dir = A2_TEST_OUT_DIR "/aria2_RpcMethodTest_testAddTorrent";
-    File(dir).mkdirs();
-    auto opt = Dict::g();
-    opt->put(PREF_DIR->k, dir);
-    File(dir + "/0a3893293e27ac0490424c06de4d09242215f0a6.torrent").remove();
-    req.params->append(std::move(opt));
-
-    auto res = m.execute(std::move(req), e_.get());
-    CPPUNIT_ASSERT_EQUAL(0, res.code);
-    a2_gid_t gid;
-    CPPUNIT_ASSERT_EQUAL(
-        0, GroupId::toNumericId(gid, downcast<String>(res.param)->s().c_str()));
-    CPPUNIT_ASSERT_EQUAL(dir + "/aria2-0.8.2.tar.bz2",
-                         findReservedGroup(e_->getRequestGroupMan().get(), gid)
-                             ->getFirstFilePath());
-    CPPUNIT_ASSERT(
-        File(dir + "/0a3893293e27ac0490424c06de4d09242215f0a6.torrent")
-            .exists());
-  }
-}
-
-void RpcMethodTest::testAddTorrent_withoutTorrent()
-{
-  AddTorrentRpcMethod m;
-  auto res =
-      m.execute(createReq(AddTorrentRpcMethod::getMethodName()), e_.get());
-  CPPUNIT_ASSERT_EQUAL(1, res.code);
-}
-
-void RpcMethodTest::testAddTorrent_notBase64Torrent()
-{
-  AddTorrentRpcMethod m;
-  auto req = createReq(AddTorrentRpcMethod::getMethodName());
-  req.params->append("not torrent");
-  auto res = m.execute(std::move(req), e_.get());
-  CPPUNIT_ASSERT_EQUAL(1, res.code);
-}
-
-void RpcMethodTest::testAddTorrent_withPosition()
-{
-  AddTorrentRpcMethod m;
-  auto req1 = createReq(AddTorrentRpcMethod::getMethodName());
-  req1.params->append(readFile(A2_TEST_DIR "/test.torrent"));
-  req1.params->append(List::g());
-  req1.params->append(Dict::g());
-  auto res1 = m.execute(std::move(req1), e_.get());
-  CPPUNIT_ASSERT_EQUAL(0, res1.code);
-
-  auto req2 = createReq(AddTorrentRpcMethod::getMethodName());
-  req2.params->append(readFile(A2_TEST_DIR "/single.torrent"));
-  req2.params->append(List::g());
-  req2.params->append(Dict::g());
-  req2.params->append(Integer::g(0));
-  m.execute(std::move(req2), e_.get());
-
-  CPPUNIT_ASSERT_EQUAL((size_t)1,
-                       getReservedGroup(e_->getRequestGroupMan().get(), 0)
-                           ->getDownloadContext()
-                           ->getFileEntries()
-                           .size());
-}
-
-#endif // ENABLE_BITTORRENT
-
 #ifdef ENABLE_METALINK
 namespace {
 RpcRequest createAddMetalinkReq()
@@ -615,17 +465,6 @@ void RpcMethodTest::testChangeOption()
   req.params->append(GroupId::toHex(group->getGID()));
   auto opt = Dict::g();
   opt->put(PREF_MAX_DOWNLOAD_LIMIT->k, "100K");
-#ifdef ENABLE_BITTORRENT
-  opt->put(PREF_BT_MAX_PEERS->k, "100");
-  opt->put(PREF_BT_REQUEST_PEER_SPEED_LIMIT->k, "300K");
-  opt->put(PREF_MAX_UPLOAD_LIMIT->k, "50K");
-
-  {
-    auto btObject = make_unique<BtObject>();
-    btObject->btRuntime = std::make_shared<BtRuntime>();
-    e_->getBtRegistry()->put(group->getGID(), std::move(btObject));
-  }
-#endif // ENABLE_BITTORRENT
   req.params->append(std::move(opt));
   auto res = m.execute(std::move(req), e_.get());
 
@@ -635,18 +474,6 @@ void RpcMethodTest::testChangeOption()
   CPPUNIT_ASSERT_EQUAL((int)100_k, group->getMaxDownloadSpeedLimit());
   CPPUNIT_ASSERT_EQUAL(std::string("102400"),
                        option->get(PREF_MAX_DOWNLOAD_LIMIT));
-#ifdef ENABLE_BITTORRENT
-  CPPUNIT_ASSERT_EQUAL(std::string("307200"),
-                       option->get(PREF_BT_REQUEST_PEER_SPEED_LIMIT));
-
-  CPPUNIT_ASSERT_EQUAL(std::string("100"), option->get(PREF_BT_MAX_PEERS));
-  CPPUNIT_ASSERT_EQUAL(
-      100, e_->getBtRegistry()->get(group->getGID())->btRuntime->getMaxPeers());
-
-  CPPUNIT_ASSERT_EQUAL((int)50_k, group->getMaxUploadSpeedLimit());
-  CPPUNIT_ASSERT_EQUAL(std::string("51200"),
-                       option->get(PREF_MAX_UPLOAD_LIMIT));
-#endif // ENABLE_BITTORRENT
 }
 
 void RpcMethodTest::testChangeOption_withBadOption()
@@ -694,9 +521,6 @@ void RpcMethodTest::testChangeGlobalOption()
   auto req = createReq(ChangeGlobalOptionRpcMethod::getMethodName());
   auto opt = Dict::g();
   opt->put(PREF_MAX_OVERALL_DOWNLOAD_LIMIT->k, "100K");
-#ifdef ENABLE_BITTORRENT
-  opt->put(PREF_MAX_OVERALL_UPLOAD_LIMIT->k, "50K");
-#endif // ENABLE_BITTORRENT
   req.params->append(std::move(opt));
   auto res = m.execute(std::move(req), e_.get());
 
@@ -705,12 +529,6 @@ void RpcMethodTest::testChangeGlobalOption()
       (int)100_k, e_->getRequestGroupMan()->getMaxOverallDownloadSpeedLimit());
   CPPUNIT_ASSERT_EQUAL(std::string("102400"),
                        e_->getOption()->get(PREF_MAX_OVERALL_DOWNLOAD_LIMIT));
-#ifdef ENABLE_BITTORRENT
-  CPPUNIT_ASSERT_EQUAL(
-      (int)50_k, e_->getRequestGroupMan()->getMaxOverallUploadSpeedLimit());
-  CPPUNIT_ASSERT_EQUAL(std::string("51200"),
-                       e_->getOption()->get(PREF_MAX_OVERALL_UPLOAD_LIMIT));
-#endif // ENABLE_BITTORRENT
 }
 
 void RpcMethodTest::testChangeGlobalOption_withBadOption()
@@ -765,29 +583,12 @@ void addUri(const std::string& uri, const std::shared_ptr<DownloadEngine>& e)
 }
 } // namespace
 
-#ifdef ENABLE_BITTORRENT
-namespace {
-void addTorrent(const std::string& torrentFile,
-                const std::shared_ptr<DownloadEngine>& e)
-{
-  AddTorrentRpcMethod m;
-  auto req = createReq(AddTorrentRpcMethod::getMethodName());
-  req.params->append(readFile(torrentFile));
-  auto res = m.execute(std::move(req), e.get());
-}
-} // namespace
-#endif // ENABLE_BITTORRENT
-
 void RpcMethodTest::testTellWaiting()
 {
   addUri("http://1/", e_);
   addUri("http://2/", e_);
   addUri("http://3/", e_);
-#ifdef ENABLE_BITTORRENT
-  addTorrent(A2_TEST_DIR "/single.torrent", e_);
-#else  // !ENABLE_BITTORRENT
   addUri("http://4/", e_);
-#endif // !ENABLE_BITTORRENT
   auto& rgman = e_->getRequestGroupMan();
   TellWaitingRpcMethod m;
   auto req = createReq(TellWaitingRpcMethod::getMethodName());
@@ -958,29 +759,6 @@ void RpcMethodTest::testGatherStoppedDownload()
   CPPUNIT_ASSERT(entry->containsKey("gid"));
 }
 
-#ifdef ENABLE_BITTORRENT
-void RpcMethodTest::testGatherStoppedDownload_bt()
-{
-  auto d = std::make_shared<DownloadResult>();
-  d->gid = GroupId::create();
-  d->infoHash = "2089b05ecca3d829cee5497d2703803b52216d19";
-  d->attrs = std::vector<std::shared_ptr<ContextAttribute>>(MAX_CTX_ATTR);
-
-  auto torrentAttr = std::make_shared<TorrentAttribute>();
-  torrentAttr->creationDate = 1000000007;
-  d->attrs[CTX_ATTR_BT] = torrentAttr;
-
-  auto entry = Dict::g();
-  gatherStoppedDownload(entry.get(), d, {});
-
-  auto btDict = downcast<Dict>(entry->get("bittorrent"));
-  CPPUNIT_ASSERT(btDict);
-
-  CPPUNIT_ASSERT_EQUAL((int64_t)1000000007,
-                       downcast<Integer>(btDict->get("creationDate"))->i());
-}
-#endif // ENABLE_BITTORRENT
-
 void RpcMethodTest::testGatherProgressCommon()
 {
   auto dctx = std::make_shared<DownloadContext>(0, 0, "aria2.tar.bz2");
@@ -1034,51 +812,6 @@ void RpcMethodTest::testGatherProgressCommon()
   CPPUNIT_ASSERT_EQUAL((size_t)1, entry->size());
   CPPUNIT_ASSERT(entry->containsKey("gid"));
 }
-
-#ifdef ENABLE_BITTORRENT
-void RpcMethodTest::testGatherBitTorrentMetadata()
-{
-  auto option = std::make_shared<Option>();
-  option->put(PREF_DIR, ".");
-  auto dctx = std::make_shared<DownloadContext>();
-  bittorrent::load(A2_TEST_DIR "/test.torrent", dctx, option);
-  auto btDict = Dict::g();
-  gatherBitTorrentMetadata(btDict.get(), bittorrent::getTorrentAttrs(dctx));
-  CPPUNIT_ASSERT_EQUAL(std::string("REDNOAH.COM RULES"),
-                       downcast<String>(btDict->get("comment"))->s());
-  CPPUNIT_ASSERT_EQUAL((int64_t)1123456789,
-                       downcast<Integer>(btDict->get("creationDate"))->i());
-  CPPUNIT_ASSERT_EQUAL(std::string("multi"),
-                       downcast<String>(btDict->get("mode"))->s());
-  CPPUNIT_ASSERT_EQUAL(
-      std::string("aria2-test"),
-      downcast<String>(downcast<Dict>(btDict->get("info"))->get("name"))->s());
-  const List* announceList = downcast<List>(btDict->get("announceList"));
-  CPPUNIT_ASSERT_EQUAL((size_t)3, announceList->size());
-  CPPUNIT_ASSERT_EQUAL(
-      std::string("http://tracker1"),
-      downcast<String>(downcast<List>(announceList->get(0))->get(0))->s());
-  CPPUNIT_ASSERT_EQUAL(
-      std::string("http://tracker2"),
-      downcast<String>(downcast<List>(announceList->get(1))->get(0))->s());
-  CPPUNIT_ASSERT_EQUAL(
-      std::string("http://tracker3"),
-      downcast<String>(downcast<List>(announceList->get(2))->get(0))->s());
-  // Remove some keys
-  auto modBtAttrs = bittorrent::getTorrentAttrs(dctx);
-  modBtAttrs->comment.clear();
-  modBtAttrs->creationDate = 0;
-  modBtAttrs->mode = BT_FILE_MODE_NONE;
-  modBtAttrs->metadata.clear();
-  btDict = Dict::g();
-  gatherBitTorrentMetadata(btDict.get(), modBtAttrs);
-  CPPUNIT_ASSERT(!btDict->containsKey("comment"));
-  CPPUNIT_ASSERT(!btDict->containsKey("creationDate"));
-  CPPUNIT_ASSERT(!btDict->containsKey("mode"));
-  CPPUNIT_ASSERT(!btDict->containsKey("info"));
-  CPPUNIT_ASSERT(btDict->containsKey("announceList"));
-}
-#endif // ENABLE_BITTORRENT
 
 void RpcMethodTest::testChangePosition()
 {

@@ -52,10 +52,6 @@ std::unique_ptr<RpcMethod> noSuchRpcMethod;
 namespace {
 std::vector<std::string> rpcMethodNames = {
     "aria2.addUri",
-#ifdef ENABLE_BITTORRENT
-    "aria2.addTorrent",
-    "aria2.getPeers",
-#endif // ENABLE_BITTORRENT
 #ifdef ENABLE_METALINK
     "aria2.addMetalink",
 #endif // ENABLE_METALINK
@@ -101,9 +97,6 @@ std::vector<std::string> rpcNotificationsNames = {
     "aria2.onDownloadStart",      "aria2.onDownloadPause",
     "aria2.onDownloadStop",       "aria2.onDownloadComplete",
     "aria2.onDownloadError",
-#ifdef ENABLE_BITTORRENT
-    "aria2.onBtDownloadComplete",
-#endif // ENABLE_BITTORRENT
 };
 } // namespace
 
@@ -118,16 +111,6 @@ std::unique_ptr<RpcMethod> createMethod(const std::string& methodName)
   if (methodName == AddUriRpcMethod::getMethodName()) {
     return make_unique<AddUriRpcMethod>();
   }
-
-#ifdef ENABLE_BITTORRENT
-  if (methodName == AddTorrentRpcMethod::getMethodName()) {
-    return make_unique<AddTorrentRpcMethod>();
-  }
-
-  if (methodName == GetPeersRpcMethod::getMethodName()) {
-    return make_unique<GetPeersRpcMethod>();
-  }
-#endif // ENABLE_BITTORRENT
 
 #ifdef ENABLE_METALINK
   if (methodName == AddMetalinkRpcMethod::getMethodName()) {

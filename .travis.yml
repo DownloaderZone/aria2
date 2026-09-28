@@ -33,7 +33,6 @@ addons:
 before_install:
   - $CC --version
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
-  # gmp is already installed
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install --force cppunit gettext openssl libssh2 c-ares sqlite3 ccache ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew link --force cppunit gettext openssl libssh2 c-ares sqlite3 ccache ; fi
   - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7"; fi

@@ -2,8 +2,7 @@ aria2 for Android devices
 =========================
 
 aria2 is a lightweight multi-protocol & multi-source download utility
-operated in command-line. It supports HTTP/HTTPS, FTP, BitTorrent and
-Metalink.
+operated in command-line. It supports HTTP/HTTPS, FTP and Metalink.
 
 Install
 -------

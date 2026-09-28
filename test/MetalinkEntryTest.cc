@@ -44,7 +44,7 @@ std::unique_ptr<MetalinkEntry> createTestEntry()
   res2->priority = 1;
   auto res3 = make_unique<MetalinkResource>();
   res3->url = "http://myhost/aria2.torrent";
-  res3->type = MetalinkResource::TYPE_BITTORRENT;
+  res3->type = MetalinkResource::TYPE_NOT_SUPPORTED;
   res3->location = "al";
   res3->priority = 40;
   auto res4 = make_unique<MetalinkResource>();
@@ -71,20 +71,15 @@ void MetalinkEntryTest::testDropUnsupportedResource()
   auto entry = createTestEntry();
 
   entry->dropUnsupportedResource();
-#if defined(ENABLE_SSL) && defined(ENABLE_BITTORRENT)
-  CPPUNIT_ASSERT_EQUAL((size_t)4, entry->resources.size());
-#elif defined(ENABLE_SSL) || defined(ENABLE_BITTORRENT)
+#if defined(ENABLE_SSL)
   CPPUNIT_ASSERT_EQUAL((size_t)3, entry->resources.size());
-#else  // defined(ENABLE_SSL) || defined(ENABLE_BITTORRENT)
+#else // defined(ENABLE_SSL) defined()
   CPPUNIT_ASSERT_EQUAL((size_t)2, entry->resources.size());
-#endif // defined(ENABLE_SSL) || defined(ENABLE_BITTORRENT)
+#endif // defined(ENABLE_SSL) defined()
 
   auto itr = std::begin(entry->resources);
   CPPUNIT_ASSERT_EQUAL(MetalinkResource::TYPE_FTP, (*itr++)->type);
   CPPUNIT_ASSERT_EQUAL(MetalinkResource::TYPE_HTTP, (*itr++)->type);
-#ifdef ENABLE_BITTORRENT
-  CPPUNIT_ASSERT_EQUAL(MetalinkResource::TYPE_BITTORRENT, (*itr++)->type);
-#endif // ENABLE_BITTORRENT
 #ifdef ENABLE_SSL
   CPPUNIT_ASSERT_EQUAL(MetalinkResource::TYPE_HTTPS, (*itr++)->type);
 #endif // ENABLE_SSL
@@ -129,7 +124,7 @@ void MetalinkEntryTest::testSetProtocolPriority()
   entry->setProtocolPriority("http", -1);
   CPPUNIT_ASSERT_EQUAL(50, entry->resources[0]->priority); // ftp
   CPPUNIT_ASSERT_EQUAL(0, entry->resources[1]->priority);  // http, -1
-  CPPUNIT_ASSERT_EQUAL(40, entry->resources[2]->priority); // bittorrent
+  CPPUNIT_ASSERT_EQUAL(40, entry->resources[2]->priority); // not supported
   CPPUNIT_ASSERT_EQUAL(90, entry->resources[3]->priority); // not supported
   CPPUNIT_ASSERT_EQUAL(10, entry->resources[4]->priority); // https
 }

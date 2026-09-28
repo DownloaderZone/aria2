@@ -482,9 +482,8 @@ void AbstractCommand::onAbort()
   }
 
   getSegmentMan()->cancelSegment(getCuid());
-  // Don't do following process if BitTorrent is involved or files
-  // in DownloadContext is more than 1. The latter condition is
-  // limitation of current implementation.
+  // Don't do following process if files in DownloadContext is more than 1.
+  // The latter condition is limitation of current implementation.
   if (getOption()->getAsBool(PREF_ALWAYS_RESUME) || !fileEntry_ ||
       getDownloadContext()->getNetStat().getSessionDownloadLength() != 0 ||
       requestGroup_->p2pInvolved() ||

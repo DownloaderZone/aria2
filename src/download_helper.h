@@ -52,31 +52,6 @@ class UriListParser;
 class ValueBase;
 class GroupId;
 
-#ifdef ENABLE_BITTORRENT
-// Create RequestGroup object using torrent file specified by
-// metaInfoUri, which is treated as local file path. If non-empty
-// torrentData is specified, then it is used as a content of torrent
-// file instead. If adjustAnnounceUri is true, announce URIs are
-// adjusted using bittorrent::adjustAnnounceUri().  In this function,
-// force-sequential is ignored.
-void createRequestGroupForBitTorrent(
-    std::vector<std::shared_ptr<RequestGroup>>& result,
-    const std::shared_ptr<Option>& option, const std::vector<std::string>& uris,
-    const std::string& metaInfoUri, const std::string& torrentData = "",
-    bool adjustAnnounceUri = true);
-
-// Create RequestGroup object using already decoded torrent metainfo
-// structure.  If adjustAnnounceUri is true, announce URIs are
-// adjusted using bittorrent::adjustAnnounceUri().  In this function,
-// force-sequential is ignored.
-void createRequestGroupForBitTorrent(
-    std::vector<std::shared_ptr<RequestGroup>>& result,
-    const std::shared_ptr<Option>& option, const std::vector<std::string>& uris,
-    const std::string& metaInfoUri, const ValueBase* torrent,
-    bool adjustAnnounceUri = true);
-
-#endif // ENABLE_BITTORRENT
-
 #ifdef ENABLE_METALINK
 // Create RequestGroup objects using Metalink file specified by
 // metalink-file option. If non-empty metalinkData is specified, it is
@@ -116,9 +91,9 @@ void createRequestGroupForUriList(
     const std::shared_ptr<Option>& option);
 
 // Create RequestGroup object using provided uris.  If ignoreLocalPath
-// is true, a path to torrent file and metalink file are ignored.  If
+// is true, a path to metalink file is ignored.  If
 // throwOnError is true, exception will be thrown when Metalink
-// Document or .torrent file cannot be parsed or unrecognized URI is
+// Document cannot be parsed or unrecognized URI is
 // given. If throwOnError is false, these errors are just logged as
 // error.
 void createRequestGroupForUri(

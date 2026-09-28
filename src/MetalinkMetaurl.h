@@ -54,8 +54,6 @@ public:
                   const std::string& name, int priority);
 
   ~MetalinkMetaurl();
-
-  static const char MEDIATYPE_TORRENT[];
 };
 
 } // namespace aria2
