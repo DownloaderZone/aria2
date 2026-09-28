@@ -15,7 +15,6 @@ RUN apk add --no-cache \
     openssl-dev \
     openssl-libs-static \
     c-ares-dev \
-    c-ares-static \
     zlib-dev \
     zlib-static \
     sqlite-dev \
