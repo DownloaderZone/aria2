@@ -1490,8 +1490,30 @@ ssize_t parse_content_disposition(char* dest, size_t destlen,
           state = CD_AFTER_VALUE;
         }
       }
-      else if (!inRFC5987AttrChar(*p)) {
-        return -1;
+      else {
+        unsigned char c = static_cast<unsigned char>(*p);
+        if (c < 0x20 || c == 0x7f) {
+          return -1;
+        }
+        if (charset == CD_ENC_UTF8) {
+          if (utf8dfa(&dfa_state, &dfa_code, c) == UTF8_REJECT) {
+            return -1;
+          }
+        }
+        else if (charset == CD_ENC_ISO_8859_1) {
+          if (!isIso8859p1(c)) {
+            return -1;
+          }
+        }
+        if (in_file_parm) {
+          if (dlen == 0) {
+            return -1;
+          }
+          else {
+            *dp++ = *p;
+            --dlen;
+          }
+        }
       }
       break;
     case CD_VALUE_CHARS_PCT_ENCODED1:

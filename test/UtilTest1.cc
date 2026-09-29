@@ -824,6 +824,16 @@ void UtilTest1::testGetContentDispositionFilename()
   val = "attachment; filename=\"foo-\xc2\x02.html\"";
   CPPUNIT_ASSERT_EQUAL(std::string(""),
                        util::getContentDispositionFilename(val, true));
+
+  val = "attachment; filename*=UTF-8''"
+        "The%20WONDERfools%20S01E08%202160p%20DV%20HDR%20NF%20WEB-DL%20"
+        "(Hindi%2BTamil%2BTelugu%2BEnglish%20DDP%205.1)%20%2B%20Korean%20"
+        "DDPA%205.1%20H.265%20(NAVOX-IvY).mkv";
+  CPPUNIT_ASSERT_EQUAL(
+      std::string("The WONDERfools S01E08 2160p DV HDR NF WEB-DL "
+                  "(Hindi+Tamil+Telugu+English DDP 5.1) + Korean DDPA 5.1 "
+                  "H.265 (NAVOX-IvY).mkv"),
+      util::getContentDispositionFilename(val, false));
 }
 
 void UtilTest1::testParseContentDisposition1()
