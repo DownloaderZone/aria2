@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 #
 AC_PREREQ([2.67])
-AC_INIT([aria2],[2.0.0],[https://github.com/DownloaderZone/aria2/issues],[aria2],[https://github.com/DownloaderZone/aria2])
+AC_INIT([aria2],[2.0.1],[https://github.com/DownloaderZone/aria2/issues],[aria2],[https://github.com/DownloaderZone/aria2])
 
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
